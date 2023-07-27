@@ -1,0 +1,646 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>DiaDisc Dashboard</title>
+    <link href="{{url_for('static',filename='css/main.css')}}" rel="stylesheet">
+    <link href="{{url_for('static',filename='css/custom.css')}}" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+
+<body>
+    <div class="min-h-full">
+        <nav class="border-b border-gray-200 bg-white">
+          <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="flex h-16 justify-between">
+              <div class="flex">
+                <div class="flex flex-shrink-0 items-center">
+                  <img class="block h-8 w-auto lg:hidden" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600" alt="Your Company">
+                  <img class="hidden h-8 w-auto lg:block" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600" alt="Your Company">
+                </div>
+                <div class="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
+                  <!-- Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
+                  <a href="#" class="border-indigo-500 text-gray-900 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium" aria-current="page">Dashboard</a>
+                  <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">Modules</a>
+                </div>
+              </div>
+              <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                <button type="button" class="rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                  <span class="sr-only">View notifications</span>
+                  <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                  </svg>
+                </button>
+      
+                <!-- Profile dropdown -->
+                <div class="relative ml-3">
+                  <div>
+                    <button type="button" class="flex max-w-xs items-center rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+                      <span class="sr-only">Open user menu</span>
+                      <img class="h-8 w-8 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="-mr-2 flex items-center sm:hidden">
+                <!-- Mobile menu button -->
+                <button type="button" class="inline-flex items-center justify-center rounded-md bg-white p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" aria-controls="mobile-menu" aria-expanded="false">
+                  <span class="sr-only">Open main menu</span>
+                  <!-- Menu open: "hidden", Menu closed: "block" -->
+                  <svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                  </svg>
+                  <!-- Menu open: "block", Menu closed: "hidden" -->
+                  <svg class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+      
+          <!-- Mobile menu, show/hide based on menu state. -->
+          <div class="sm:hidden" id="mobile-menu">
+            <div class="space-y-1 pb-3 pt-2">
+              <!-- Current: "border-indigo-500 bg-indigo-50 text-indigo-700", Default: "border-transparent text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800" -->
+              <a href="#" class="border-indigo-500 bg-indigo-50 text-indigo-700 block border-l-4 py-2 pl-3 pr-4 text-base font-medium" aria-current="page">Dashboard</a>
+              <a href="#" class="border-transparent text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800 block border-l-4 py-2 pl-3 pr-4 text-base font-medium">Team</a>
+              <a href="#" class="border-transparent text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800 block border-l-4 py-2 pl-3 pr-4 text-base font-medium">Projects</a>
+              <a href="#" class="border-transparent text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800 block border-l-4 py-2 pl-3 pr-4 text-base font-medium">Calendar</a>
+            </div>
+            <div class="border-t border-gray-200 pb-3 pt-4">
+              <div class="flex items-center px-4">
+                <div class="flex-shrink-0">
+                  <img class="h-10 w-10 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+                </div>
+                <div class="ml-3">
+                  <div class="text-base font-medium text-gray-800">Tom Cook</div>
+                  <div class="text-sm font-medium text-gray-500">tom@example.com</div>
+                </div>
+                <button type="button" class="ml-auto flex-shrink-0 rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                  <span class="sr-only">View notifications</span>
+                  <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                  </svg>
+                </button>
+              </div>
+              <div class="mt-3 space-y-1">
+                <a href="#" class="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800">Your Profile</a>
+                <a href="#" class="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800">Settings</a>
+                <a href="#" class="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800">Sign out</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+      
+        <div class="py-10">
+          <header>
+
+          </header>
+          <main>
+            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 grid-container">
+              <!-- Your content -->
+
+                <div class="screen1">
+                    <div id="chart1">
+
+                    </div>
+                </div>
+                <div class="screen2">
+                    <div id="terminal"></div>
+                </div>
+                <div class="editor">
+                    <div class="editor-left bg-gray-50">
+                        <div class="editor-controls">
+                            <button type="button" class="control-button rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Run</button>
+                            <button type="button" class="control-button rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Cancel</button>
+                        </div>
+                        <div class="editor-modules">
+                            <ul id="module-list">
+
+                            </ul>
+                            <button class="add-module-button hover:bg-gray-100" onclick="displayModuleSelector()">
+                                +
+                            </button>
+                        </div>
+                    </div>
+                    <div class="editor-right">
+                        <div class="timeline-times"></div>
+                        <div class="timeline-columns">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+          </main>
+        </div>
+      </div>
+
+      <div class="relative z-10" id="module-selector" style="display: none;" role="dialog" aria-modal="true" onclick="hideModuleSelector()">
+        <!--
+          Background backdrop, show/hide based on modal state.
+      
+          Entering: "ease-out duration-300"
+            From: "opacity-0"
+            To: "opacity-100"
+          Leaving: "ease-in duration-200"
+            From: "opacity-100"
+            To: "opacity-0"
+        -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-25 transition-opacity"></div>
+      
+        <div class="fixed inset-0 z-10 overflow-y-auto p-4 sm:p-6 md:p-20">
+          <!--
+            Command palette, show/hide based on modal state.
+      
+            Entering: "ease-out duration-300"
+              From: "opacity-0 scale-95"
+              To: "opacity-100 scale-100"
+            Leaving: "ease-in duration-200"
+              From: "opacity-100 scale-100"
+              To: "opacity-0 scale-95"
+          -->
+          <div class="mx-auto max-w-xl transform divide-y divide-gray-100 overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
+      
+            <div class="relative">
+                <p class="h-12 w-full border-0 bg-transparent px-4 py-4 text-gray-400 sm:text-sm">Select a module</p>
+            </div>
+
+            <!-- Results, show/hide based on command palette state -->
+            <ul class="max-h-72 scroll-py-2 overflow-y-auto py-2 text-sm text-gray-800" id="options" role="listbox">
+              <!-- Active: "bg-indigo-600 text-white" -->
+              <li class="cursor-default select-none px-4 py-2 hover:bg-blue-600 hover:text-white" id="option-1" role="option" tabindex="-1" onclick="addModule('motor')">Motor</li>
+              <li class="cursor-default select-none px-4 py-2 hover:bg-blue-600 hover:text-white" id="option-2" role="option" tabindex="-1" onclick="addModule('eload')">eLoaD</li>
+              <li class="cursor-default select-none px-4 py-2 hover:bg-blue-600 hover:text-white" id="option-3" role="option" tabindex="-1" onclick="addModule('spectroscope')">Spectroscope</li>
+            </ul>
+      
+
+          </div>
+        </div>
+      </div>
+</body>
+
+<script>
+    const moduleList = document.getElementById('module-list')
+    const moduleSelector = document.getElementById('module-selector')
+
+    function displayModuleSelector(){
+        moduleSelector.style.display = 'block'
+    }
+
+    function hideModuleSelector(){
+        moduleSelector.style.display = 'none'
+    }
+
+    function addModule(module){
+        // Create the li element
+        const liElement = document.createElement("li");
+        liElement.classList.add('module')
+
+        // Create the paragraph element and set its content
+        const pElement = document.createElement("p");
+        pElement.textContent = module;
+        pElement.classList.add('module-title', 'text-sm')
+
+        // Create the "Connect" button element
+        const buttonElement = document.createElement("button");
+        buttonElement.textContent = "Connect";
+        buttonElement.classList.add('connect-button', 'text-xs', 'text-gray-600')
+        buttonElement.addEventListener('click', function() {
+        connect();
+        });
+
+        // Append the paragraph and button elements to the li element
+        liElement.appendChild(pElement);
+        liElement.appendChild(buttonElement);
+        moduleList.appendChild(liElement);
+    }
+
+    function addAction(action){
+      //TODO
+    }
+
+
+        // --------
+    // Timeline
+
+    // Helper functions to simulate BLE send, read, and stop_read actions
+    function bleSend(device, data) {
+      console.log(`Sending data to ${device}: ${data}`);
+    }
+
+    function bleRead(device, format) {
+      console.log(`Reading data from ${device} with format: ${format}`);
+    }
+
+    function bleStopRead(device, format) {
+      console.log(`Stop reading data from ${device} with format: ${format}`);
+    }
+
+    // Main function to trigger actions based on timeline JSON
+    function triggerActions(timelineJson) {
+      timelineJson.forEach((entry) => {
+        const device = entry.name;
+
+        entry.actions.forEach((action) => {
+          const start_time = parseTime(action.start_time);
+          const end_time = parseTime(action.end_time);
+
+          if (action.methods.hasOwnProperty('write')) {
+            const start_data = action.methods.write.start_data;
+            const stop_data = action.methods.write.stop_data;
+
+            // Trigger bleSend at start_time with start_data
+            setTimeout(() => {
+              bleSend(device, start_data);
+            }, start_time);
+
+            // Trigger bleSend at end_time with stop_data
+            setTimeout(() => {
+              bleSend(device, stop_data);
+            }, end_time);
+          }
+
+          if (action.methods.hasOwnProperty('read')) {
+            const format = action.methods.read.format;
+
+            // Trigger bleRead at start_time with format
+            setTimeout(() => {
+              bleRead(device, format);
+            }, start_time);
+
+            // Trigger bleStopRead at end_time with format
+            setTimeout(() => {
+              bleStopRead(device, format);
+            }, end_time);
+          }
+        });
+      });
+    }
+
+    // Helper function to parse time in mm:ss format and return milliseconds
+    function parseTime(timeStr) {
+      const [minutes, seconds] = timeStr.split(':').map(Number);
+      return minutes * 60 * 1000 + seconds * 1000;
+    }
+
+
+    const timelineJson = [
+      {
+        'name': 'spectroscope',
+        'connected': false,
+        'actions': [
+          {
+            'start_time': '00:00',
+            'end_time': '00:15',
+            'methods': {
+              'read': {
+                'format': 'fluorescence <fluorescence_value>',
+                'screen': '1',
+              }
+            }
+
+          }
+
+        ]
+      },
+      {
+        'name': 'motor',
+        'connected': false,
+        'actions': [
+          {
+            'start_time': '00:00',
+            'end_time': '00:30',
+            'methods': {
+              'write': {
+                'start_data': 'rpm 1000',
+                'stop_data': 'rpm 0',
+              }
+            }
+          },
+          {
+            'start_time': '00:30',
+            'end_time': '00:45',
+            'methods': {
+              'write': {
+                'start_data': 'rpm 2000',
+                'stop_data': 'rpm 0',
+              }
+            }
+          },
+        ]
+      },
+      {
+        'name': 'eload',
+        'connected': false,
+        'actions': [
+          {
+            'start_time': '00:00',
+            'end_time': '00:10',
+            'methods': {
+              'write': {
+                'start_data': 'denaturation 95, extension 72, annealing 55',
+                'stop_data': 'denaturation 0, extension 0, annealing 0',
+              },
+              'read': {
+                'format': 'denaturation <denaturation_value>, extension <extension_value>, annealing <annealing_value>',
+                'screen': '2',
+              }
+            }
+
+          }
+        ]
+      }
+    ]
+
+
+
+    triggerActions(timelineJson);
+
+    function timelineDataToLocalstorage(){
+      let timelineString = JSON.stringify(timeline_json)
+      localStorage.setItem('timeline_data', timeline_string)
+    }
+
+    function getTimelineData(){
+      let timelineString = localStorage.getItem('timeline_data');
+      if (timelineString) {
+        try {
+          timelineJson = JSON.parse(timelineString);
+          for(let timelineElement of timelineJson){
+            addModule(timelineElement['name'])
+            for (let action of timelineElement['actions']){
+              addAction(action)
+            }
+          }
+        } catch (error) {
+          console.error('Error parsing stored data:', error);
+        }
+      }
+    }
+
+
+    // -------------------
+    // Bluetooth
+    let terminalContainer = document.getElementById('terminal');
+
+    // Selected device object cache
+    let deviceCache = null;
+
+    // Launch Bluetooth device chooser and connect to the selected
+    function connect() {
+        return (deviceCache ? Promise.resolve(deviceCache) :
+        requestBluetoothDevice()).
+        then(device => connectDeviceAndCacheCharacteristic(device)).
+        then(characteristic => startNotifications(characteristic)).
+        catch(error => log(error));
+    }
+
+    function requestBluetoothDevice() {
+        log('Requesting bluetooth device...');
+
+        return navigator.bluetooth.requestDevice({
+            //acceptAllDevices: true
+            filters: [{services: [0xFFE0]}],
+        }).
+        then(device => {
+            log('"' + device.name + '" bluetooth device selected');
+            deviceCache = device;
+
+            // Added line
+            deviceCache.addEventListener('gattserverdisconnected',
+                handleDisconnection);
+
+            return deviceCache;
+        });
+    }
+
+    function handleDisconnection(event) {
+        let device = event.target;
+
+        log('"' + device.name +
+            '" bluetooth device disconnected, trying to reconnect...');
+
+        connectDeviceAndCacheCharacteristic(device).
+            then(characteristic => startNotifications(characteristic)).
+            catch(error => log(error));
+    }
+
+        // Characteristic object cache
+    let characteristicCache = null;
+
+    // Connect to the device specified, get service and characteristic
+    function connectDeviceAndCacheCharacteristic(device) {
+        if (device.gatt.connected && characteristicCache) {
+            return Promise.resolve(characteristicCache);
+        }
+
+        log('Connecting to GATT server...');
+
+        return device.gatt.connect().
+            then(server => {
+                log('GATT server connected, getting service...');
+
+                return server.getPrimaryService(0xFFE0);
+            }).
+            then(service => {
+                log('Service found, getting characteristic...');
+
+                return service.getCharacteristic(0xFFE1);
+            }).
+            then(characteristic => {
+                log('Characteristic found');
+                characteristicCache = characteristic;
+                console.log(characteristic)
+
+                return characteristicCache;
+            });
+    }
+
+    // Enable the characteristic changes notification
+    function startNotifications(characteristic) {
+    log('Starting notifications...');
+
+    return characteristic.startNotifications().
+        then(() => {
+            log('Notifications started');
+            characteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);
+        });
+        
+    }
+
+    // Output to terminal
+    function log(data, type = '') {
+    terminalContainer.insertAdjacentHTML('beforeend',
+        '<div' + (type ? ' class="' + type + '"' : '') + '>' + data + '</div>');
+    }
+
+
+    function disconnect() {
+        if (deviceCache) {
+            log('Disconnecting from "' + deviceCache.name + '" bluetooth device...');
+            deviceCache.removeEventListener('gattserverdisconnected',
+                handleDisconnection);
+
+        if (deviceCache.gatt.connected) {
+            deviceCache.gatt.disconnect();
+            log('"' + deviceCache.name + '" bluetooth device disconnected');
+        }
+        else {
+            log('"' + deviceCache.name +
+                '" bluetooth device is already disconnected');
+        }
+    }
+
+    // Added condition
+    if (characteristicCache) {
+        characteristicCache.removeEventListener('characteristicvaluechanged',
+            handleCharacteristicValueChanged);
+        characteristicCache = null;
+    }
+
+    deviceCache = null;
+    }
+
+    // Data receiving
+    function handleCharacteristicValueChanged(event) {
+        let value = new TextDecoder().decode(event.target.value);
+        log(value, 'in');
+    }
+
+    // Send data to the connected device
+    function send(data) {
+        data = String(data);
+
+        if (!data || !characteristicCache) {
+            return;
+        }
+
+        writeToCharacteristic(characteristicCache, data);
+        log(data, 'out');
+    }
+
+    function writeToCharacteristic(characteristic, data) {
+        characteristic.writeValue(new TextEncoder().encode(data));
+    }
+
+
+    // ------------------------
+    // Graph
+    var lastDate = 0;
+    var data = []
+    var TICKINTERVAL = 86400000
+    let XAXISRANGE = 777600000
+    function getDayWiseTimeSeries(baseval, count, yrange) {
+        var i = 0;
+        while (i < count) {
+            var x = baseval;
+            var y = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
+
+            data.push({
+            x, y
+            });
+            lastDate = baseval
+            baseval += TICKINTERVAL;
+            i++;
+        }
+    }
+
+    getDayWiseTimeSeries(new Date('11 Feb 2017 GMT').getTime(), 10, {
+        min: 10,
+        max: 90
+    })
+
+    function getNewSeries(baseval, yrange) {
+        var newDate = baseval + TICKINTERVAL;
+        lastDate = newDate
+
+        for(var i = 0; i< data.length - 10; i++) {
+            // IMPORTANT
+            // we reset the x and y of the data which is out of drawing area
+            // to prevent memory leaks
+            data[i].x = newDate - XAXISRANGE - TICKINTERVAL
+            data[i].y = 0
+        }
+
+        data.push({
+            x: newDate,
+            y: Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min
+        })
+    }
+
+    function resetData(){
+        // Alternatively, you can also reset the data at certain intervals to prevent creating a huge series 
+        data = data.slice(data.length - 10, data.length);
+    }
+
+
+
+    var options = {
+        series: [{
+            data: data.slice()
+        }],
+        chart: {
+            id: 'realtime',
+            height: 350,
+            type: 'line',
+            animations: {
+            enabled: true,
+            easing: 'linear',
+            dynamicAnimation: {
+                speed: 1000
+            }
+            },
+            toolbar: {
+            show: false
+            },
+            zoom: {
+            enabled: false
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        title: {
+            text: 'Dynamic Updating Chart',
+            align: 'left'
+        },
+        markers: {
+            size: 0
+        },
+        xaxis: {
+            type: 'datetime',
+            range: XAXISRANGE,
+            labels: {
+                show: false,
+            }
+        },
+        yaxis: {
+            max: 100
+        },
+        legend: {
+            show: false
+        },
+    };
+
+    var chart = new ApexCharts(document.querySelector("#chart1"), options);
+    chart.render();
+      
+      
+    window.setInterval(function () {
+        getNewSeries(lastDate, {
+            min: 10,
+            max: 90
+    })
+    
+    chart.updateSeries([{
+        data: data
+    }])
+    }, 1000)
+
+
+
+</script>
+
+</html>
+

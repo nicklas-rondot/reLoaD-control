@@ -1,0 +1,89 @@
+.grid-container{
+    padding-left: 2rem;
+    padding-right: 2rem;
+    display: grid;
+    grid-template-areas:
+    'screen1 screen2'
+    'editor editor';
+    gap: 20px; 
+    height: calc(100% - 150px);
+}
+
+.grid-container > div {
+  background-color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  border: 1px solid rgb(229, 231, 235);
+  border-radius: 8px;
+}
+
+.screen1{
+    grid-area: screen1;
+}
+
+.screen2{
+    grid-area: screen2;
+}
+
+.editor{
+    grid-area: editor;
+    display: flex;
+    padding: 0;
+    overflow: hidden;
+    height: 30vh;
+}
+
+.editor-left{
+    width: 200px;
+    height: 100%;
+    border-right: 1px solid rgb(229, 231, 235);
+    box-shadow: rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px;
+
+}
+
+.editor-controls{
+    padding: 5px 0px;
+    display: flex;
+    justify-content: center;
+    align-items: space-between;
+    box-shadow: rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px;
+
+}
+
+.control-button{
+    margin: 0px 5px;
+}
+
+.editor-modules{
+    padding-top: 1px;
+}
+
+.module{
+    border-bottom: 1px solid rgb(229, 231, 235);
+    padding: 5px 0px;
+}
+
+
+.add-module-button{
+    border-bottom: 1px solid rgb(229, 231, 235);
+    padding: 5px 0px;
+    width: 100%;
+}
+
+.editor-right{
+    height: 100%;
+    width: 100%;
+}
+
+.timeline-times{
+    box-shadow: rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px;
+    height: 38px; 
+    width: 100%;
+}
+
+.timeline-columns{
+    display: grid;
+    grid-template-rows: 1.75rem repeat(288, minmax(0px, 1fr)) auto;
+    width: calc(100% - 200px);
+    height: calc(100% - 38px);
+    margin: 0;
+}
