@@ -21,7 +21,7 @@
                 <div class="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
                   <!-- Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
                   <a href="#" class="border-indigo-500 text-gray-900 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium" aria-current="page">Dashboard</a>
-                  <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">Modules</a>
+                  <a href="/modules" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">Modules</a>
                 </div>
               </div>
               <div class="hidden sm:ml-6 sm:flex sm:items-center">
@@ -112,8 +112,8 @@
                 <div class="editor">
                     <div class="editor-left bg-gray-50">
                         <div class="editor-controls">
-                            <button type="button" class="control-button rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Run</button>
-                            <button type="button" class="control-button rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Cancel</button>
+                            <button type="button" onclick="runTimeline()" class="control-button rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Run</button>
+                            <button type="button" onclick="cancelTimeline()" class="control-button rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Cancel</button>
                         </div>
                         <div class="editor-modules">
                             <ul id="module-list">
@@ -126,8 +126,8 @@
                     </div>
                     <div class="editor-right">
                         <div class="timeline-times"></div>
-                        <div class="timeline-columns">
-                        </div>
+                        <ul class="timeline-rows" id="timeline-rows">
+                        </ul>
                     </div>
                 </div>
 
@@ -136,6 +136,7 @@
         </div>
       </div>
 
+      <!--Add Module Overlay-->
       <div class="relative z-10" id="module-selector" style="display: none;" role="dialog" aria-modal="true" onclick="hideModuleSelector()">
         <!--
           Background backdrop, show/hide based on modal state.
@@ -178,11 +179,56 @@
           </div>
         </div>
       </div>
+
+      <!--Add Action Overlay-->
+
+      <div id="action-overlay" style="display: none;" class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+        <!--
+          Slide-over panel, show/hide based on slide-over state.
+
+          Entering: "transform transition ease-in-out duration-500 sm:duration-700"
+            From: "translate-x-full"
+            To: "translate-x-0"
+          Leaving: "transform transition ease-in-out duration-500 sm:duration-700"
+            From: "translate-x-0"
+            To: "translate-x-full"
+        -->
+        <div class="pointer-events-auto w-screen max-w-md">
+          <div class="flex h-full flex-col divide-y divide-gray-200 bg-white shadow-xl">
+            <div class="flex min-h-0 flex-1 flex-col overflow-y-scroll py-6">
+              <div class="px-4 sm:px-6">
+                <div class="flex items-start justify-between">
+                  <h2 class="text-base font-semibold leading-6 text-gray-900" id="slide-over-title">Add an action</h2>
+                  <div class="ml-3 flex h-7 items-center">
+                    <button type="button" onclick="closeAddActionOverlay()" class="relative rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                      <span class="absolute -inset-2.5"></span>
+                      <span class="sr-only">Close panel</span>
+                      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="relative mt-6 flex-1 px-4 sm:px-6">
+                <!-- Your content -->
+              </div>
+            </div>
+            <div class="flex flex-shrink-0 justify-end px-4 py-4">
+              <button type="button" class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:ring-gray-400">Cancel</button>
+              <button type="submit" class="ml-4 inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
 </body>
 
 <script>
     const moduleList = document.getElementById('module-list')
+    const timelineRows = document.getElementById('timeline-rows')
     const moduleSelector = document.getElementById('module-selector')
+    const actionOverlay = document.getElementById('action-overlay')
 
     function displayModuleSelector(){
         moduleSelector.style.display = 'block'
@@ -194,105 +240,75 @@
 
     function addModule(module){
         // Create the li element
-        const liElement = document.createElement("li");
+        let liElement = document.createElement("li");
         liElement.classList.add('module')
 
         // Create the paragraph element and set its content
-        const pElement = document.createElement("p");
+        let pElement = document.createElement("p");
         pElement.textContent = module;
         pElement.classList.add('module-title', 'text-sm')
 
         // Create the "Connect" button element
-        const buttonElement = document.createElement("button");
+        let buttonElement = document.createElement("button");
         buttonElement.textContent = "Connect";
         buttonElement.classList.add('connect-button', 'text-xs', 'text-gray-600')
+        buttonElement.id = `connect-button-${module}`
         buttonElement.addEventListener('click', function() {
-        connect(`${module}`);
+          connect(`${module}`);
         });
 
         // Append the paragraph and button elements to the li element
         liElement.appendChild(pElement);
         liElement.appendChild(buttonElement);
         moduleList.appendChild(liElement);
+
+        let rowElement = document.createElement("li");
+        rowElement.classList.add('timeline-row')
+        rowElement.addEventListener('click', function() {
+          showAddActionOverlay(`${module}`);
+        });
+
+        timelineRows.appendChild(rowElement)
     }
 
-    function addAction(action){
-      //TODO
+    function showAddActionOverlay(module){
+      actionOverlay.style.display = 'block';
+    }
+    
+    function closeAddActionOverlay(){
+      actionOverlay.style.display = 'none';
+    }
+    
+    function changeModuleConnectionState(module, state){
+      let connectButton = document.getElementById(`connect-button-${module}`)
+      let moduleObj = timelineJson.find(moduleObj => moduleObj.name === module)
+
+      if(state == "connected"){
+        moduleObj.connected = true
+        connectButton.classList.add('connected')
+        connectButton.textContent = "Connected"
+      }
+      else if(state == "disconnected"){
+        moduleObj.connected = true
+        connectButton.classList.add('disconnected')
+        connectButton.textContent = "Connect"
+      }
+
     }
 
 
         // --------
     // Timeline
-
-    // Helper functions to simulate BLE send, read, and stop_read actions
-    function bleSend(device, data) {
-      console.log(`Sending data to ${device}: ${data}`);
-    }
-
-    function bleRead(device, format) {
-      console.log(`Reading data from ${device} with format: ${format}`);
-    }
-
-    function bleStopRead(device, format) {
-      console.log(`Stop reading data from ${device} with format: ${format}`);
-    }
-
-    // Main function to trigger actions based on timeline JSON
-    function triggerActions(timelineJson) {
-      timelineJson.forEach((entry) => {
-        const device = entry.name;
-
-        entry.actions.forEach((action) => {
-          const start_time = parseTime(action.start_time);
-          const end_time = parseTime(action.end_time);
-
-          if (action.methods.hasOwnProperty('write')) {
-            const start_data = action.methods.write.start_data;
-            const stop_data = action.methods.write.stop_data;
-
-            // Trigger bleSend at start_time with start_data
-            setTimeout(() => {
-              bleSend(device, start_data);
-            }, start_time);
-
-            // Trigger bleSend at end_time with stop_data
-            setTimeout(() => {
-              bleSend(device, stop_data);
-            }, end_time);
-          }
-
-          if (action.methods.hasOwnProperty('read')) {
-            const format = action.methods.read.format;
-
-            // Trigger bleRead at start_time with format
-            setTimeout(() => {
-              bleRead(device, format);
-            }, start_time);
-
-            // Trigger bleStopRead at end_time with format
-            setTimeout(() => {
-              bleStopRead(device, format);
-            }, end_time);
-          }
-        });
-      });
-    }
-
-    // Helper function to parse time in mm:ss format and return milliseconds
-    function parseTime(timeStr) {
-      const [minutes, seconds] = timeStr.split(':').map(Number);
-      return minutes * 60 * 1000 + seconds * 1000;
-    }
-
-
     const timelineJson = [
       {
         'name': 'spectroscope',
         'connected': false,
         'actions': [
           {
-            'start_time': '00:00',
-            'end_time': '00:15',
+            'startTime': '00:00',
+            'endTime': '00:50',
+            'StartTimeoutId': null,
+            'StopTimeoutId': null,
             'methods': {
               'read': {
                 'format': 'fluorescence <fluorescence_value>',
@@ -309,22 +325,26 @@
         'connected': false,
         'actions': [
           {
-            'start_time': '00:00',
-            'end_time': '00:30',
+            'startTime': '00:00',
+            'endTime': '00:30',
+            'StartTimeoutId': null,
+            'StopTimeoutId': null,
             'methods': {
               'write': {
-                'start_data': 'rpm 1000',
-                'stop_data': 'rpm 0',
+                'startData': 'rpm 1000',
+                'stopData': 'rpm 0',
               }
             }
           },
           {
-            'start_time': '00:30',
-            'end_time': '00:45',
+            'startTime': '00:30',
+            'endTime': '00:45',
+            'StartTimeoutId': null,
+            'StopTimeoutId': null,
             'methods': {
               'write': {
-                'start_data': 'rpm 2000',
-                'stop_data': 'rpm 0',
+                'startData': 'rpm 2000',
+                'stopData': 'rpm 0',
               }
             }
           },
@@ -335,12 +355,14 @@
         'connected': false,
         'actions': [
           {
-            'start_time': '00:00',
-            'end_time': '00:10',
+            'startTime': '00:00',
+            'endTime': '00:10',
+            'StartTimeoutId': null,
+            'StopTimeoutId': null,
             'methods': {
               'write': {
-                'start_data': 'denaturation 95, extension 72, annealing 55',
-                'stop_data': 'denaturation 0, extension 0, annealing 0',
+                'startData': 'denaturation 95, extension 72, annealing 55',
+                'stopData': 'denaturation 0, extension 0, annealing 0',
               },
               'read': {
                 'format': 'denaturation <denaturation_value>, extension <extension_value>, annealing <annealing_value>',
@@ -353,9 +375,134 @@
       }
     ]
 
+    const screens = [];
 
 
-    triggerActions(timelineJson);
+    function blRead(device, format, screen) {
+      console.log(`Reading data from ${device} with format: ${format}`);
+      screens.push(
+        {
+          id: screen,
+          display: device,
+          data: [],
+          chartInstance: null,
+          disabled: false,
+        },
+      )
+      const currentTime = new Date().getTime();
+      screen = screens.find(screen => screen.display === device) || null;
+      screen.data.push({ x: currentTime, y: 0 });
+      chart = createChart(screen)
+      screen.chartInstance = chart;
+      console.log(screens)
+      
+    }
+
+    function blStopRead(device, format) {
+      console.log(`Stop reading data from ${device} with format: ${format}`);
+      screen = screens.find(screen => screen.display === device) || null;
+      disableChart(screen);
+    }
+
+    var timelineStartTime = new Date();
+
+    // Main function to trigger actions based on timeline JSON
+    function runTimeline() {
+
+      timelineStartTime = new Date()
+
+      timelineJson.forEach((entry) => {
+        let device = entry.name;
+
+        entry.actions.forEach((action) => {
+
+          let startTime = parseTime(action.startTime);
+          let endTime = parseTime(action.endTime);
+
+          if (action.methods.hasOwnProperty('write')) {
+            let startData = action.methods.write.startData;
+            let stopData = action.methods.write.stopData;
+
+            // Trigger bleSend at startTime with startData
+            action.StartTimeoutId = setTimeout(() => {
+              blSend(device, startData);
+            }, startTime);
+
+            // Trigger bleSend at endTime with stopData
+            action.StopTimeoutId = setTimeout(() => {
+              blSend(device, stopData);
+            }, endTime);
+          }
+
+          if (action.methods.hasOwnProperty('read')) {
+            let format = action.methods.read.format;
+            let screen = action.methods.read.screen;
+
+            // Trigger bleRead at startTime with format
+            action.StartTimeoutId = setTimeout(() => {
+              blRead(device, format, screen);
+            }, startTime);
+
+            // Trigger bleStopRead at endTime with format
+            action.StopTimeoutId = setTimeout(() => {
+              blStopRead(device, format);
+            }, endTime);
+          }
+        });
+      });
+    }
+
+    function cancelTimeline(){
+      const timelineCancelTime = new Date()
+      let pastTime = timelineCancelTime - timelineStartTime
+
+      timelineJson.forEach((entry) => {
+        let device = entry.name;
+
+        entry.actions.forEach((action) => {
+
+          const timelineStartTime = new Date()
+
+          let startTime = parseTime(action.startTime);
+          let endTime = parseTime(action.endTime);
+
+          if (action.methods.hasOwnProperty('write')) {
+
+            let startData = action.methods.write.startData;
+            let stopData = action.methods.write.stopData;
+
+            if(startTime > pastTime){
+              clearTimeout(action.StartTimeoutId);
+            }
+            if(endTime > pastTime){
+              clearTimeout(action.StopTimeoutId);
+              blSend(device, stopData);
+            }
+          }
+
+          if (action.methods.hasOwnProperty('read')) {
+
+            let format = action.methods.read.format;
+            let screen = action.methods.read.screen;
+
+            if(startTime > pastTime){
+              clearTimeout(action.StartTimeoutId);
+            }
+            if(endTime > pastTime){
+              clearTimeout(action.StopTimeoutId);
+              blStopRead(device, format);
+            }
+          }
+        });
+      });
+    }
+
+    // Helper function to parse time in mm:ss format and return milliseconds
+    function parseTime(timeStr) {
+      const [minutes, seconds] = timeStr.split(':').map(Number);
+      return minutes * 60 * 1000 + seconds * 1000;
+    }
+
 
     function timelineDataToLocalstorage(){
       let timelineString = JSON.stringify(timeline_json)
@@ -390,7 +537,7 @@
 
       if (existingDevice) {
         log('Selecting a new Bluetooth device for "' + deviceName + '"...');
-        return requestBluetoothDevice().then(device => {
+        return requestBluetoothDevice(deviceName).then(device => {
           existingDevice.device = device;
           return connectDeviceAndCacheCharacteristic(device).then(characteristic =>
             startNotifications(deviceName, characteristic)
@@ -398,7 +545,7 @@
         });
       }
 
-      return requestBluetoothDevice().then(device => {
+      return requestBluetoothDevice(deviceName).then(device => {
         devices.push({ name: deviceName, device: device });
         return connectDeviceAndCacheCharacteristic(device).then(characteristic =>
           startNotifications(deviceName, characteristic)
@@ -407,7 +554,7 @@
     }
 
 
-    function requestBluetoothDevice() {
+    function requestBluetoothDevice(deviceName) {
       log('Requesting bluetooth device...');
 
       return navigator.bluetooth
@@ -419,18 +566,20 @@
           deviceCache = device;
 
           // Added line
-          deviceCache.addEventListener('gattserverdisconnected', handleDisconnection);
+          deviceCache.addEventListener('gattserverdisconnected', handleDisconnection.bind(null, deviceName));
 
           return deviceCache;
         });
     }
 
-    function handleDisconnection(event) {
+    function handleDisconnection(deviceName, event) {
       let device = event.target;
 
       log(
         '"' + device.name + '" bluetooth device disconnected, trying to reconnect...'
       );
+
+      changeModuleConnectionState(deviceName, "disconnected")
 
       connectDeviceAndCacheCharacteristic(device)
         .then(characteristic => startNotifications(characteristic))
@@ -484,6 +633,7 @@
             'characteristicvaluechanged',
             handleCharacteristicValueChanged.bind(null, deviceName)
           );
+          changeModuleConnectionState(deviceName, "connected")
         })
         .catch(error => log(error));
     }
@@ -528,13 +678,19 @@
         return;
       }
       let value = new TextDecoder().decode(event.target.value);
-      let screen = screensArray.find(screen => screen.display === displayValue) || null;
+      let screen = screens.find(screen => screen.display === deviceName) || null;
+
+      log(value, 'in');
+
+      if (!screen) {
+        console.log("Screen with display name '" + deviceName + "' not found.");
+        return;
+      }
 
       writeToScreen(value, screen)
-      log(value, 'in');
     }
 
-    function send(deviceName, data) {
+    function blSend(deviceName, data) {
       let device = devices.find(device => device.name === deviceName);
 
       if (!device) {
@@ -558,117 +714,87 @@
     }
 
     // ------------------------
-    // Graph
-    var lastDate = 0;
-    var data = []
-    var TICKINTERVAL = 86400000
-    let XAXISRANGE = 777600000
-    function getDayWiseTimeSeries(baseval, count, yrange) {
-        var i = 0;
-        while (i < count) {
-            var x = baseval;
-            var y = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
+    // Charts
 
-            data.push({
-            x, y
-            });
-            lastDate = baseval
-            baseval += TICKINTERVAL;
-            i++;
-        }
-    }
 
-    getDayWiseTimeSeries(new Date('11 Feb 2017 GMT').getTime(), 10, {
-        min: 10,
-        max: 90
-    })
 
-    function getNewSeries(baseval, yrange) {
-        var newDate = baseval + TICKINTERVAL;
-        lastDate = newDate
-
-        for(var i = 0; i< data.length - 10; i++) {
-            // IMPORTANT
-            // we reset the x and y of the data which is out of drawing area
-            // to prevent memory leaks
-            data[i].x = newDate - XAXISRANGE - TICKINTERVAL
-            data[i].y = 0
-        }
-
-        data.push({
-            x: newDate,
-            y: Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min
-        })
-    }
-
-    function resetData(){
+    function resetData(data){
         // Alternatively, you can also reset the data at certain intervals to prevent creating a huge series 
         data = data.slice(data.length - 10, data.length);
     }
 
+    function createChart(screen){
+      var options = {
+          series: [{
+              data: screen.data.slice()
+          }],
+          chart: {
+              id: 'realtime',
+              height: 350,
+              type: 'line',
+              animations: {
+              enabled: true,
+              easing: 'linear',
+              dynamicAnimation: {
+                  speed: 1000
+              }
+              },
+              toolbar: {
+              show: false
+              },
+              zoom: {
+              enabled: false
+              }
+          },
+          dataLabels: {
+              enabled: false
+          },
+          title: {
+              text: screen.display,
+              align: 'left'
+          },
+          markers: {
+              size: 0
+          },
+          xaxis: {
+              type: 'numeric',
+              labels: {
+                  show: false,
+              }
+          },
+          yaxis: {
+              max: 100
+          },
+          legend: {
+              show: false
+          },
+      };
 
+      var chart = new ApexCharts(document.querySelector(`#chart${screen.id}`), options);
+      chart.render();
 
-    var options = {
-        series: [{
-            data: data.slice()
-        }],
-        chart: {
-            id: 'realtime',
-            height: 350,
-            type: 'line',
-            animations: {
-            enabled: true,
-            easing: 'linear',
-            dynamicAnimation: {
-                speed: 1000
-            }
-            },
-            toolbar: {
-            show: false
-            },
-            zoom: {
-            enabled: false
-            }
-        },
-        dataLabels: {
-            enabled: false
-        },
-        title: {
-            text: 'Dynamic Updating Chart',
-            align: 'left'
-        },
-        markers: {
-            size: 0
-        },
-        xaxis: {
-            type: 'datetime',
-            range: XAXISRANGE,
-            labels: {
-                show: false,
-            }
-        },
-        yaxis: {
-            max: 100
-        },
-        legend: {
-            show: false
-        },
-    };
+      return chart
+    }
 
-    var chart = new ApexCharts(document.querySelector("#chart1"), options);
-    chart.render();
-      
-      
-    window.setInterval(function () {
-        getNewSeries(lastDate, {
-            min: 10,
-            max: 90
-    })
-    
-    chart.updateSeries([{
-        data: data
-    }])
-    }, 1000)
+    function disableChart(screen){
+      screen["disabled"] = true
+    }
+
+    function writeToScreen(value, screen){
+      if(screen["disabled"]){
+        console.log("screen disabled")
+        return
+      }
+      const currentTime = new Date().getTime();
+      if(screen.data[0]["y"] == 0){
+        screen.data.shift()
+      }
+      screen.data.push({ x: currentTime, y: value });
+
+      // Update the series data in the chart instance
+      screen.chartInstance.updateSeries([{ data: screen.data }]);
+    }
+
 
 
 

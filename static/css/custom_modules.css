@@ -1,0 +1,25 @@
+.modules-grid{
+    margin-top: 20px;
+}
+
+.module-box{
+    cursor: pointer;
+}
+
+.module-form-wrapper{
+    height: 100%;
+    overflow-y: scroll;
+    padding: 30px;
+}
+
+form{
+    margin: 0;
+}
+
+.module-form-inner-wraper{
+    height: calc(100% - 60px);
+}
+
+.add-function{
+    margin-top: 20px;
+}
