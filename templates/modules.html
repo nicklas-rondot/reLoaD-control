@@ -108,24 +108,26 @@
               </button>
 
               <ul role="list" class="modules-grid grid grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-3 xl:gap-x-8">
+                {% for module in modules %}
                 <li class="overflow-hidden rounded-xl border border-gray-200">
                   <div class="flex items-center gap-x-4 border-b border-gray-900/5 bg-gray-50 p-6">
                     <img src="https://tailwindui.com/img/logos/48x48/tuple.svg" alt="Tuple" class="h-12 w-12 flex-none rounded-lg bg-white object-cover ring-1 ring-gray-900/10">
-                    <div class="text-sm font-medium leading-6 text-gray-900">Spectroscope</div>
+                    <div class="text-sm font-medium leading-6 text-gray-900">{{module.name}}</div>
                   </div>
                   <dl class="-my-3 divide-y divide-gray-100 px-6 py-4 text-sm leading-6">
                     <div class="flex justify-between gap-x-4 py-3">
                       <dt class="text-gray-500">Created on</dt>
-                      <dd class="text-gray-700"><time datetime="2022-12-13">December 13, 2022</time></dd>
+                      <dd class="text-gray-700"><time datetime="2022-12-13">{{module.created_at}}</time></dd>
                     </div>
                     <div class="flex justify-between gap-x-4 py-3">
                       <dt class="text-gray-500">Functions</dt>
                       <dd class="flex items-start gap-x-2">
-                        <div class="font-medium text-gray-900">7</div>
+                        <div class="font-medium text-gray-900">{{module.functions.len}}</div>
                       </dd>
                     </div>
                   </dl>
                 </li>
+                {% endfor %}
 
 
               </ul>
@@ -149,6 +151,24 @@
         })
         .catch(error => console.error('Error fetching overlay content:', error));
     }
+
+    function addFunction() {
+      console.log('add function');
+      // Find the current function count
+      const functionContainers = document.getElementsByClassName('variables');
+      const functionCount = functionContainers.length + 1;
+
+      fetch(`/create_module_add_function?count=${functionCount}`)
+          .then(response => response.text())
+          .then(data => {
+
+              // Append the overlay content to the body
+              document.getElementById('functions').insertAdjacentHTML('beforeend', data);
+          })
+          .catch(error => console.error('Error fetching overlay content:', error));
+  }
+
+
 
     function hideCreateModuleOverlay(){
         document.getElementById("module-overlay-create").remove()

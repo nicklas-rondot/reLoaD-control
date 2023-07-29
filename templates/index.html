@@ -170,9 +170,9 @@
             <!-- Results, show/hide based on command palette state -->
             <ul class="max-h-72 scroll-py-2 overflow-y-auto py-2 text-sm text-gray-800" id="options" role="listbox">
               <!-- Active: "bg-indigo-600 text-white" -->
-              <li class="cursor-default select-none px-4 py-2 hover:bg-blue-600 hover:text-white" id="option-1" role="option" tabindex="-1" onclick="addModule('motor')">Motor</li>
-              <li class="cursor-default select-none px-4 py-2 hover:bg-blue-600 hover:text-white" id="option-2" role="option" tabindex="-1" onclick="addModule('eload')">eLoaD</li>
-              <li class="cursor-default select-none px-4 py-2 hover:bg-blue-600 hover:text-white" id="option-3" role="option" tabindex="-1" onclick="addModule('spectroscope')">Spectroscope</li>
+              {% for module in modules %}
+              <li class="cursor-default select-none px-4 py-2 hover:bg-blue-600 hover:text-white" id="option-1" role="option" tabindex="-1" onclick="addModule('{{module.name}}')">{{module.name}}</li>
+              {% endfor %}
             </ul>
       
 
@@ -180,55 +180,14 @@
         </div>
       </div>
 
-      <!--Add Action Overlay-->
-
-      <div id="action-overlay" style="display: none;" class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
-        <!--
-          Slide-over panel, show/hide based on slide-over state.
-
-          Entering: "transform transition ease-in-out duration-500 sm:duration-700"
-            From: "translate-x-full"
-            To: "translate-x-0"
-          Leaving: "transform transition ease-in-out duration-500 sm:duration-700"
-            From: "translate-x-0"
-            To: "translate-x-full"
-        -->
-        <div class="pointer-events-auto w-screen max-w-md">
-          <div class="flex h-full flex-col divide-y divide-gray-200 bg-white shadow-xl">
-            <div class="flex min-h-0 flex-1 flex-col overflow-y-scroll py-6">
-              <div class="px-4 sm:px-6">
-                <div class="flex items-start justify-between">
-                  <h2 class="text-base font-semibold leading-6 text-gray-900" id="slide-over-title">Add an action</h2>
-                  <div class="ml-3 flex h-7 items-center">
-                    <button type="button" onclick="closeAddActionOverlay()" class="relative rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                      <span class="absolute -inset-2.5"></span>
-                      <span class="sr-only">Close panel</span>
-                      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div class="relative mt-6 flex-1 px-4 sm:px-6">
-                <!-- Your content -->
-              </div>
-            </div>
-            <div class="flex flex-shrink-0 justify-end px-4 py-4">
-              <button type="button" class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:ring-gray-400">Cancel</button>
-              <button type="submit" class="ml-4 inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Save</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
 </body>
 
 <script>
+    const timelineJson = []
+
     const moduleList = document.getElementById('module-list')
     const timelineRows = document.getElementById('timeline-rows')
     const moduleSelector = document.getElementById('module-selector')
-    const actionOverlay = document.getElementById('action-overlay')
 
     function displayModuleSelector(){
         moduleSelector.style.display = 'block'
@@ -269,14 +228,138 @@
         });
 
         timelineRows.appendChild(rowElement)
+
+        let moduleJson = {
+          'name': module,
+          'connected': false,
+          'actions': []
+        }
+        timelineJson.push(moduleJson)
     }
 
     function showAddActionOverlay(module){
-      actionOverlay.style.display = 'block';
+        console.log('show add action overlay')
+        fetch(`/show_add_action_overlay?module=${module}`)
+        .then(response => response.text())
+        .then(data => {
+        // Append the overlay content to the body
+        document.body.insertAdjacentHTML('beforeend', data);
+        })
+        .catch(error => console.error('Error fetching overlay content:', error));
     }
-    
+
     function closeAddActionOverlay(){
-      actionOverlay.style.display = 'none';
+      document.getElementById('action-overlay').remove()
+    }
+
+    function addFunctionVariables(method){
+      let select = document.getElementById(`function-${method}-select`)
+      let functionName = select.options[select.selectedIndex].text
+      try{
+        document.getElementById(`function-${method}`).variables.remove()
+      }
+      catch{}
+      console.log('add function variables')
+        fetch(`/add_function_variables?function=${functionName}`)
+        .then(response => response.text())
+        .then(data => {
+        // Append the overlay content to the body
+        document.getElementById(`function-${method}`).insertAdjacentHTML('beforeend', data);
+        })
+        .catch(error => console.error('Error fetching overlay content:', error));
+    }
+
+    function addAction(module){
+      let startTime = document.getElementById('start-time').value
+      let endTime = document.getElementById('end-time').value
+
+      let actionJson = {
+        'startTime': startTime,
+        'endTime': endTime,
+        'StartTimeoutId': null,
+        'StopTimeoutId': null,
+        'methods': {}
+      }
+
+      let writeSelect = document.getElementById(`function-write-select`)
+      let writeFunctionName = writeSelect.options[writeSelect.selectedIndex].text
+
+      let writeVariableStr = ""
+
+      let i = 1
+      let index_exists = true
+      while(index_exists){
+        try{
+          let variable_name = document.getElementById(`variable-write-name-${i}`).textContent
+          let variable_value = document.getElementById(`variable-write-value-${i}`).value
+          if(writeVariableStr != ""){
+            writeVariableStr += " "
+          }
+          writeVariableStr += `${variable_name} ${variable_value}`
+        }
+        catch{
+          index_exists = false
+        }
+        i += 1
+      }
+
+      if(writeVariableStr != ""){
+        let writeJson = {
+          'function': writeFunctionName,
+          'start_data': writeVariableStr,
+          'stop_data': writeVariableStr.replace(/\d+/g, '0'),
+        }
+        actionJson['methods']['write'] = writeJson
+      }
+
+
+
+      let readSelect = document.getElementById(`function-read-select`)
+      let readFunctionName = readSelect.options[readSelect.selectedIndex].text
+
+      let readVariableStr = ""
+      let selectedScreen
+
+      i = 1
+      index_exists = true
+      try{
+          let screenSelect = document.getElementById(`function-read-select-screen`)
+          selectedScreen = screenSelect.options[screenSelect.selectedIndex].value
+      }
+      catch{
+        index_exists = false
+      }
+
+      while(index_exists){
+        try{
+          let variable_name = document.getElementById(`variable-read-name-${i}`).textContent
+          if(readVariableStr != ""){
+            readVariableStr += " "
+          }
+          readVariableStr += `${variable_name}`
+        }
+        catch{
+          index_exists = false
+        }
+        i += 1
+      }
+
+
+      if(readVariableStr != ""){
+        let readJson = {
+          'function': readFunctionName,
+          'format': readVariableStr,
+          'screen': selectedScreen,
+        }
+        actionJson['methods']['read'] = readJson
+      }
+
+      let moduleObj = timelineJson.find(moduleObj => moduleObj.name === module)
+
+
+      moduleObj['actions'].push(actionJson)
+      console.log(timelineJson)
+      closeAddActionOverlay()
     }
     
     function changeModuleConnectionState(module, state){
@@ -289,17 +372,18 @@
         connectButton.textContent = "Connected"
       }
       else if(state == "disconnected"){
-        moduleObj.connected = true
+        moduleObj.connected = false
         connectButton.classList.add('disconnected')
         connectButton.textContent = "Connect"
       }
+      console.log(timelineJson)
 
     }
 
 
         // --------
     // Timeline
-    const timelineJson = [
+    const timelineJson1 = [
       {
         'name': 'spectroscope',
         'connected': false,

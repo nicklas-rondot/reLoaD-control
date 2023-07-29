@@ -17,7 +17,11 @@ form{
 }
 
 .module-form-inner-wraper{
-    height: calc(100% - 60px);
+    min-height: calc(100% - 60px);
+}
+
+.variables{
+    line-height: 1.25rem;
 }
 
 .add-function{

@@ -1,0 +1,32 @@
+{% if function.method.lower() == 'write' %}
+<div id="function-write-variables" class="mt-2 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
+    {% for variable in function.variables %}
+    <div class="sm:col-span-3">
+      <label for="variable-write-value-{{loop.index}}" id="variable-write-name-{{loop.index}}" class="block text-sm font-medium leading-6 text-gray-900">{{variable.name}}</label>
+      <div class="mt-2">
+        <input type="text" name="variable-write-value-{{loop.index}}" id="variable-write-value-{{loop.index}}" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+{% if function.method.lower() == 'read' %}
+<div id="function-read-variables" class="mt-2 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
+    <div id="function-read-select-screen-wrapper" class="sm:col-span-6">
+        <label for="function-read-select-screen" class="block text-m font-medium leading-6 text-gray-900">Select screen</label>
+        <div class="mt-2">
+            <select id="function-read-select-screen" name="function-read-select-screen" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 placeholder:text-sm focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                <option hidden disabled selected value> -- select a screen -- </option>
+                <option value="1">Screen 1</option>
+                <option value="2">Screen 2</option>
+            </select>
+        </div>
+    </div>
+    {% for variable in function.variables %}
+    <div class="sm:col-span-3">
+      <p for="variable-read-value-{{loop.index}}" id="variable-read-name-{{loop.index}}" class="block text-sm font-medium leading-6 text-gray-900">{{variable.name}}</p>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}

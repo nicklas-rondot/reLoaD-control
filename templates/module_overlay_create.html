@@ -24,7 +24,7 @@
       -->
       <div class="module-form-wrapper overflow-scroll rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
   
-        <form>
+        <form action="/create_module" method="post">
           <div class="module-form-inner-wraper space-y-4">
             <div class="border-b border-gray-900/10 pb-8">
               <h2 class="text-base font-semibold leading-7 text-gray-900">Create a module</h2>
@@ -46,8 +46,14 @@
               <h2 class="text-base font-semibold leading-7 text-gray-900">Functions</h2>
               <p class="mt-1 text-sm leading-6 text-gray-600">Define the capabilites of the module</p>
         
-        
-              <div class="mt-4 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+              <div id="functions" class="mt-4 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
+                <div class="sm:col-span-2">
+                  <label for="variables-1" class="block text-sm font-medium leading-6 text-gray-900">Name</label>
+                  <div class="mt-2">
+                    <input type="text" name="name-1" id="name-1" placeholder="Your name for this function" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
+                  </div>
+                </div>
+
                 <div class="sm:col-span-2">
                   <label for="method-1" class="block text-sm font-medium leading-6 text-gray-900">Method (Read/Write)</label>
                   <div class="mt-2">
@@ -58,21 +64,21 @@
                   </div>
                 </div>
         
-                <div class="sm:col-span-4">
+                <div class="sm:col-span-2">
                   <label for="variables-1" class="block text-sm font-medium leading-6 text-gray-900">Variables (comma seperated, no spaces)</label>
                   <div class="mt-2">
-                    <input type="text" name="variables-1" id="variables-1" placeholder="Variable1,Variable2,Variable3" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                    <input type="text" name="variables-1" id="variables-1" placeholder="Variable1,Variable2,Variable3" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
                   </div>
                 </div>
               </div>
-              <button type="button" class="add-function rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:ring-gray-400">Add function</button>
+              <button type="button" onclick="addFunction()" class="add-function rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:ring-gray-400">Add function</button>
             </div>
 
           </div>
         
           <div class="module-form-buttons mt-6 flex items-center justify-end gap-x-6">
-            <button type="button" class="text-sm font-semibold leading-6 text-gray-900">Cancel</button>
-            <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save</button>
+            <button type="button" onclick="hideCreateModuleOverlay()" class="text-sm font-semibold leading-6 text-gray-900">Cancel</button>
+            <button type="submit" onclick="createModule()" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save</button>
           </div>
         </form>
   
