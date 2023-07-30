@@ -102,9 +102,7 @@
               <!-- Your content -->
 
                 <div class="screen1">
-                    <div id="chart1">
-
-                    </div>
+                    <div id="chart1"></div>
                 </div>
                 <div class="screen2">
                     <div id="terminal"></div>
@@ -189,6 +187,7 @@
     const timelineRows = document.getElementById('timeline-rows')
     const moduleSelector = document.getElementById('module-selector')
 
+
     function displayModuleSelector(){
         moduleSelector.style.display = 'block'
     }
@@ -222,6 +221,7 @@
         moduleList.appendChild(liElement);
 
         let rowElement = document.createElement("li");
+        rowElement.id = `timeline-row-${module}`
         rowElement.classList.add('timeline-row')
         rowElement.addEventListener('click', function() {
           showAddActionOverlay(`${module}`);
@@ -235,6 +235,80 @@
           'actions': []
         }
         timelineJson.push(moduleJson)
+    }
+
+    function convertTimeToSeconds(timeString) {
+      const [minutes, seconds] = timeString.split(":").map(Number);
+      return minutes * 60 + seconds;
+    }
+
+    function addActionElement(module, action){
+      console.log(action)
+      const startSeconds = convertTimeToSeconds(action['startTime']);
+      const endSeconds = convertTimeToSeconds(action['endTime']);
+      const widthSeconds = endSeconds - startSeconds;
+
+      const actionElement = document.createElement("div");
+      actionElement.classList.add('timeline-action');
+
+      actionElement.style.left = `${startSeconds * 10}px`;
+      actionElement.style.width = `${widthSeconds * 10}px`;
+
+      const timeElement = document.createElement("div");
+      timeElement.classList.add('timeline-action-times');
+      timeElement.textContent = `${action['startTime']} - ${action['endTime']}`
+
+      actionElement.appendChild(timeElement)
+
+
+      if(action['methods']['write']){
+        const method = document.createElement("div");
+        method.classList.add('timeline-action-method');
+        const title = document.createElement("p");
+        title.classList.add('timeline-action-title');
+        title.textContent = action['methods']['write']['function'];
+        method.appendChild(title);
+        
+        const parameterStr = action['methods']['write']['start_data'];
+        const parameterPairs = parameterStr.split(/\s+/);
+
+        for (let i = 0; i < parameterPairs.length; i += 2) {
+          const parameterName = parameterPairs[i];
+          const parameterValue = parameterPairs[i + 1];
+
+          const badge = document.createElement("span");
+          badge.classList.add("timeline-action-badge", "inline-flex", "items-center", "rounded-full", "bg-gray-50", "px-2", "py-1", "text-xs", "font-medium", "text-gray-600", "ring-1", "ring-inset", "ring-gray-500/10");
+          badge.textContent = `${parameterName} ${parameterValue}`;
+          method.appendChild(badge);
+        }
+        actionElement.appendChild(method);
+      }
+
+      if(action['methods']['read']){
+        const method = document.createElement("div");
+        method.classList.add('timeline-action-method');
+        const title = document.createElement("p");
+        title.classList.add('timeline-action-title', 'text-sm');
+        title.textContent = action['methods']['read']['function'];
+        method.appendChild(title);
+        
+        const parameterStr = action['methods']['read']['format'];
+        const parameters = parameterStr.split(/\s+/);
+
+        for (let i = 0; i < parameters.length; i += 1) {
+          const parameterName = parameters[i];
+
+          const badge = document.createElement("span");
+          badge.classList.add("timeline-action-badge", "inline-flex", "items-center", "rounded-full", "bg-gray-50", "px-2", "py-1", "text-xs", "font-medium", "text-gray-600", "ring-1", "ring-inset", "ring-gray-500/10");
+
+          badge.textContent = `${parameterName}`;
+          method.appendChild(badge);
+        }
+        actionElement.appendChild(method);
+      }
+      const moduleRow = document.getElementById(`timeline-row-${module}`);
+      moduleRow.appendChild(actionElement)
+      
     }
 
     function showAddActionOverlay(module){
@@ -359,6 +433,7 @@
 
       moduleObj['actions'].push(actionJson)
       console.log(timelineJson)
+      addActionElement(module, actionJson)
       closeAddActionOverlay()
     }
     
@@ -399,7 +474,6 @@
                 'screen': '1',
               }
             }
-
           }
 
         ]
@@ -468,15 +542,20 @@
         {
           id: screen,
           display: device,
-          data: [],
+          data: {},
           chartInstance: null,
           disabled: false,
+          format: format,
+          readBuffer: "",
         },
       )
       const currentTime = new Date().getTime();
       screen = screens.find(screen => screen.display === device) || null;
-      screen.data.push({ x: currentTime, y: 0 });
-      chart = createChart(screen)
+      let variables = format.split(/\s+/)
+      for(variable of variables){
+        screen.data[variable] = [{ x: currentTime, y: 0 }]
+      }
+      chart = createChart(screen, format)
       screen.chartInstance = chart;
       console.log(screens)
       
@@ -646,7 +725,7 @@
           filters: [{ services: [0xFFE0] }],
         })
         .then(device => {
-          log('"' + device.name + '" bluetooth device selected');
+          console.log('"' + device.name + '" bluetooth device selected');
           deviceCache = device;
 
           // Added line
@@ -659,7 +738,7 @@
     function handleDisconnection(deviceName, event) {
       let device = event.target;
 
-      log(
+      console.log(
         '"' + device.name + '" bluetooth device disconnected, trying to reconnect...'
       );
 
@@ -679,20 +758,20 @@
         return Promise.resolve(deviceEntry.characteristic);
       }
 
-      log('Connecting to GATT server...');
+      console.log('Connecting to GATT server...');
 
       return device.gatt
         .connect()
         .then(server => {
-          log('GATT server connected, getting service...');
+          console.log('GATT server connected, getting service...');
           return server.getPrimaryService(0xFFE0);
         })
         .then(service => {
-          log('Service found, getting characteristic...');
+          console.log('Service found, getting characteristic...');
           return service.getCharacteristic(0xFFE1);
         })
         .then(characteristic => {
-          log('Characteristic found');
+          console.log('Characteristic found');
           characteristicCache = characteristic;
           deviceEntry.characteristic = characteristic;
           return characteristicCache;
@@ -703,11 +782,11 @@
       let device = devices.find(dev => dev.name === deviceName);
 
       if (!device) {
-        log('Device with name "' + deviceName + '" not found.');
+        console.log('Device with name "' + deviceName + '" not found.');
         return;
       }
 
-      log('Starting notifications for device "' + deviceName + '"...');
+      console.log('Starting notifications for device "' + deviceName + '"...');
 
       return characteristic
         .startNotifications()
@@ -733,21 +812,21 @@
       let device = devices.find(device => device.name === deviceName);
 
       if (!device) {
-        log('Device with name "' + deviceName + '" not found.');
+        console.log('Device with name "' + deviceName + '" not found.');
         return;
       }
 
       let characteristic = device.characteristic;
       if (!characteristic) {
-        log('No characteristic found for device "' + deviceName + '".');
+        console.log('No characteristic found for device "' + deviceName + '".');
         return;
       }
 
       if (characteristic.gatt.connected) {
         characteristic.gatt.disconnect();
-        log('"' + deviceName + '" bluetooth device disconnected');
+        console.log('"' + deviceName + '" bluetooth device disconnected');
       } else {
-        log('"' + deviceName + '" bluetooth device is already disconnected');
+        console.log('"' + deviceName + '" bluetooth device is already disconnected');
       }
 
       // Remove the characteristic reference
@@ -758,27 +837,43 @@
       let device = devices.find(device => device.name === deviceName);
 
       if (!device) {
-        log('Device with name "' + deviceName + '" not found.');
+        console.log('Device with name "' + deviceName + '" not found.');
         return;
       }
       let value = new TextDecoder().decode(event.target.value);
       let screen = screens.find(screen => screen.display === deviceName) || null;
 
-      log(value, 'in');
+      console.log("received data")
 
       if (!screen) {
         console.log("Screen with display name '" + deviceName + "' not found.");
         return;
       }
 
-      writeToScreen(value, screen)
+
+      for (let c of value) {
+        if (c === '\n') {
+          let data = screen['readBuffer'].trim();
+          screen['readBuffer'] = '';
+          console.log(data)
+
+          if (data) {
+            console.log(`receive: ${data}`);
+            writeToScreen(deviceName, data, screen);
+          }
+        }
+        else {
+          screen['readBuffer'] += c;
+        }
+      }
     }
+    
 
     function blSend(deviceName, data) {
       let device = devices.find(device => device.name === deviceName);
 
       if (!device) {
-        log('Device with name "' + deviceName + '" not found.');
+        console.log('Device with name "' + deviceName + '" not found.');
         return;
       }
 
@@ -789,8 +884,24 @@
         return;
       }
 
-      writeToCharacteristic(device.characteristic, data);
-      log(data, 'out');
+      data += '\n';
+
+      if (data.length > 20) {
+        let chunks = data.match(/(.|[\r\n]){1,20}/g);
+
+        writeToCharacteristic(device.characteristic, chunks[0]);
+
+        for (let i = 1; i < chunks.length; i++) {
+          setTimeout(() => {
+            writeToCharacteristic(device.characteristic, chunks[i]);
+          }, i * 100);
+        }
+      }
+      else {
+        writeToCharacteristic(device.characteristic, data);
+      }
+
+      console.log(`send: ${data}`);
     }
 
     function writeToCharacteristic(characteristic, data) {
@@ -807,11 +918,10 @@
         data = data.slice(data.length - 10, data.length);
     }
 
-    function createChart(screen){
-      var options = {
-          series: [{
-              data: screen.data.slice()
-          }],
+    function createChart(screen, format){
+
+      let options = {
+          series: [],
           chart: {
               id: 'realtime',
               height: 350,
@@ -854,7 +964,16 @@
           },
       };
 
-      var chart = new ApexCharts(document.querySelector(`#chart${screen.id}`), options);
+      let variables = format.split(/\s+/)
+      for(variable of variables){
+        let variableDataJson = {
+          name: variable,
+          data: screen.data[variable].slice()
+        }
+        options.series.push(variableDataJson)
+      }
+
+      let chart = new ApexCharts(document.querySelector(`#chart${screen.id}`), options);
       chart.render();
 
       return chart
@@ -864,19 +983,35 @@
       screen["disabled"] = true
     }
 
-    function writeToScreen(value, screen){
+    function writeToScreen(deviceName, data_str, screen){
       if(screen["disabled"]){
         console.log("screen disabled")
         return
       }
+      const format = screen.format
       const currentTime = new Date().getTime();
-      if(screen.data[0]["y"] == 0){
-        screen.data.shift()
-      }
-      screen.data.push({ x: currentTime, y: value });
 
-      // Update the series data in the chart instance
-      screen.chartInstance.updateSeries([{ data: screen.data }]);
+      let newSeries = []
+      const variables = format.split(/\s+/)
+      const data = data_str.split(/\s+/)
+      console.log(data)
+      console.log(screen.data)
+      for(let i=0; i<data.length; i+=2){
+        if(screen.data[data[i]][0]["y"] == 0){
+          screen.data[data[i]].shift()
+        }
+        screen.data[data[i]].push({ x: currentTime, y: data[i+1] })
+        newSeries.push(
+          {
+            name: data[i],
+            data: screen.data[data[i]],
+          }
+        )
+      }
+      console.log(screen.data)
+      console.log(newSeries)
+
+      screen.chartInstance.updateSeries(newSeries);
     }
 
 

@@ -32,6 +32,7 @@
     padding: 0;
     overflow: hidden;
     min-height: 30vh;
+    overflow-y: scroll;
 }
 
 .editor-left{
@@ -62,7 +63,11 @@
 .module{
     border-bottom: 1px solid rgb(229, 231, 235);
     padding: 5px 0px;
-    height: 50px;
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 
@@ -75,6 +80,7 @@
 .editor-right{
     height: 100%;
     width: 100%;
+    overflow-x: scroll;
 }
 
 .timeline-times{
@@ -89,8 +95,42 @@
 }
 
 .timeline-row{
+    position: relative;
     min-width: 100%;
     border-bottom: 1px solid rgb(229, 231, 235);
     height: 50px;
     cursor: pointer;
+    height: 80px;
+}
+
+.timeline-action{
+    position: absolute;
+    height: 100%;
+    border-radius: 8px;
+    background-color: rgb(192, 208, 219);
+    border: 1px solid lightgrey;
+    padding: 5px 15px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.timeline-action-method{
+    display: flex;
+    align-items: center;
+}
+
+.timeline-action-times{
+    text-align: left;
+    font-size: 14;
+}
+
+.timeline-action-title{
+    margin-right: 10px;
+    font-size: 14;
+}
+
+.timeline-action-badge{
+    background-color: rgba(249, 250, 251, 0.5);
+    margin-right: 5px;
 }
