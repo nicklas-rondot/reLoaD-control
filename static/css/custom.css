@@ -111,6 +111,7 @@
     border: 1px solid lightgrey;
     padding: 5px 15px;
     display: flex;
+    overflow: hidden;
     justify-content: center;
     flex-direction: column;
 }
@@ -120,9 +121,23 @@
     align-items: center;
 }
 
+.timeline-action-top{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
 .timeline-action-times{
     text-align: left;
     font-size: 14;
+}
+
+.timeline-action-delete{
+    background-color: transparent;
+    border: None;
+    outline: None;
+    z-index: 100;
 }
 
 .timeline-action-title{
@@ -133,4 +148,5 @@
 .timeline-action-badge{
     background-color: rgba(249, 250, 251, 0.5);
     margin-right: 5px;
+    white-space: nowrap;
 }

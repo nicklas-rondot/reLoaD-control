@@ -105,7 +105,7 @@
                     <div id="chart1"></div>
                 </div>
                 <div class="screen2">
-                    <div id="terminal"></div>
+                  <div id="chart2"></div>
                 </div>
                 <div class="editor">
                     <div class="editor-left bg-gray-50">
@@ -250,15 +250,26 @@
 
       const actionElement = document.createElement("div");
       actionElement.classList.add('timeline-action');
+      actionElement.id = `timeline-action-${action.id}`
 
       actionElement.style.left = `${startSeconds * 10}px`;
       actionElement.style.width = `${widthSeconds * 10}px`;
 
-      const timeElement = document.createElement("div");
+      const topElement = document.createElement("div");
+      topElement.classList.add('timeline-action-top');
+
+      const timeElement = document.createElement("p");
       timeElement.classList.add('timeline-action-times');
       timeElement.textContent = `${action['startTime']} - ${action['endTime']}`
 
-      actionElement.appendChild(timeElement)
+      const deleteButton = document.createElement("button");
+      deleteButton.classList.add('timeline-action-delete')
+      deleteButton.onclick = () => {deleteAction(module, action.id)}
+      deleteButton.textContent = 'x'
+
+      topElement.appendChild(timeElement)
+      topElement.appendChild(deleteButton)
+      actionElement.appendChild(topElement)
 
 
       if(action['methods']['write']){
@@ -269,7 +280,7 @@
         title.textContent = action['methods']['write']['function'];
         method.appendChild(title);
         
-        const parameterStr = action['methods']['write']['start_data'];
+        const parameterStr = action['methods']['write']['startData'];
         const parameterPairs = parameterStr.split(/\s+/);
 
         for (let i = 0; i < parameterPairs.length; i += 2) {
@@ -344,10 +355,12 @@
     }
 
     function addAction(module){
-      let startTime = document.getElementById('start-time').value
-      let endTime = document.getElementById('end-time').value
+      const startTime = document.getElementById('start-time').value
+      const endTime = document.getElementById('end-time').value
+      const id = Date.now().toString(36) + Math.floor(Math.pow(10, 12) + Math.random() * 9*Math.pow(10, 12)).toString(36)
 
       let actionJson = {
+        'id': id,
         'startTime': startTime,
         'endTime': endTime,
         'StartTimeoutId': null,
@@ -380,8 +393,8 @@
       if(writeVariableStr != ""){
         let writeJson = {
           'function': writeFunctionName,
-          'start_data': writeVariableStr,
-          'stop_data': writeVariableStr.replace(/\d+/g, '0'),
+          'startData': writeVariableStr,
+          'stopData': writeVariableStr.replace(/\d+/g, '0'),
         }
         actionJson['methods']['write'] = writeJson
       }
@@ -435,6 +448,26 @@
       console.log(timelineJson)
       addActionElement(module, actionJson)
       closeAddActionOverlay()
+    }
+
+    function deleteAction(module, actionId){
+      let moduleObjIndex = timelineJson.findIndex(moduleObj => moduleObj.name === module)
+      console.log(timelineJson[moduleObjIndex])
+
+      if(timelineJson[moduleObjIndex]['actions']){
+        let actionObjIndex = timelineJson[moduleObjIndex]['actions'].findIndex(actionObj => actionObj.id === actionId);
+
+        if (actionObjIndex !== -1) {
+          timelineJson[moduleObjIndex]['actions'].splice(actionObjIndex, 1);
+        }
+
+        document.getElementById(`timeline-action-${actionId}`).remove()
+      }
+      else{
+        console.log(`couldn't remove action with ID ${actionId}`)
+      }
+      console.log(timelineJson)
+
     }
     
     function changeModuleConnectionState(module, state){
@@ -538,6 +571,14 @@
 
     function blRead(device, format, screen) {
       console.log(`Reading data from ${device} with format: ${format}`);
+
+      const oldScreenIndex = screens.findIndex(screen => screen.id === screen)
+      if(oldScreenIndex !== -1){
+        console.log(`Killing old chart on screen ${screen}`);
+        screens[oldScreenIndex].chartInstance.destroy()
+        screens.splice(oldScreenIndex, 1)
+      }
+
       screens.push(
         {
           id: screen,
@@ -692,14 +733,13 @@
 
     // -------------------
     // Bluetooth
-    let terminalContainer = document.getElementById('terminal');
     let devices = [];
 
     function connect(deviceName) {
       let existingDevice = devices.find(device => device.name === deviceName);
 
       if (existingDevice) {
-        log('Selecting a new Bluetooth device for "' + deviceName + '"...');
+        console.log('Selecting a new Bluetooth device for "' + deviceName + '"...');
         return requestBluetoothDevice(deviceName).then(device => {
           existingDevice.device = device;
           return connectDeviceAndCacheCharacteristic(device).then(characteristic =>
@@ -718,7 +758,7 @@
 
 
     function requestBluetoothDevice(deviceName) {
-      log('Requesting bluetooth device...');
+      console.log('Requesting bluetooth device...');
 
       return navigator.bluetooth
         .requestDevice({
@@ -746,7 +786,7 @@
 
       connectDeviceAndCacheCharacteristic(device)
         .then(characteristic => startNotifications(characteristic))
-        .catch(error => log(error));
+        .catch(error => console.log(error));
     }
 
     let characteristicCache = null;
@@ -791,21 +831,14 @@
       return characteristic
         .startNotifications()
         .then(() => {
-          log('Notifications started for device "' + deviceName + '"');
+          console.log('Notifications started for device "' + deviceName + '"');
           characteristic.addEventListener(
             'characteristicvaluechanged',
             handleCharacteristicValueChanged.bind(null, deviceName)
           );
           changeModuleConnectionState(deviceName, "connected")
         })
-        .catch(error => log(error));
-    }
-
-    function log(data, type = '') {
-      terminalContainer.insertAdjacentHTML(
-        'beforeend',
-        '<div' + (type ? ' class="' + type + '"' : '') + '>' + data + '</div>'
-      );
+        .catch(error => console.log(error));
     }
 
     function disconnect(deviceName) {
@@ -880,11 +913,13 @@
       data = String(data);
 
       if (!data || !device.characteristic) {
-        log('No data or characteristic found for device "' + deviceName + '".');
+        console.log('No data or characteristic found for device "' + deviceName + '".');
         return;
       }
 
       data += '\n';
+
+      console.log(`send: ${data}`);
 
       if (data.length > 20) {
         let chunks = data.match(/(.|[\r\n]){1,20}/g);
@@ -901,7 +936,6 @@
         writeToCharacteristic(device.characteristic, data);
       }
 
-      console.log(`send: ${data}`);
     }
 
     function writeToCharacteristic(characteristic, data) {
