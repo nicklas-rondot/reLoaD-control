@@ -8,7 +8,7 @@
 
 .module-form-wrapper{
     height: 100%;
-    overflow-y: scroll;
+    overflow: auto;
     padding: 30px;
 }
 

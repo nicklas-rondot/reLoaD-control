@@ -1,0 +1,40 @@
+<div class="relative z-10" id="code-editor-overlay" role="dialog" aria-modal="true" >
+    <!--
+      Background backdrop, show/hide based on modal state.
+  
+      Entering: "ease-out duration-300"
+        From: "opacity-0"
+        To: "opacity-100"
+      Leaving: "ease-in duration-200"
+        From: "opacity-100"
+        To: "opacity-0"
+    -->
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-25 transition-opacity" onclick="hideCreateModuleOverlay()"></div>
+  
+    <div class="fixed inset-0 z-10 overflow-y-auto p-4 sm:p-6 md:p-20">
+      <!--
+        Command palette, show/hide based on modal state.
+  
+        Entering: "ease-out duration-300"
+          From: "opacity-0 scale-95"
+          To: "opacity-100 scale-100"
+        Leaving: "ease-in duration-200"
+          From: "opacity-100 scale-100"
+          To: "opacity-0 scale-95"
+      -->
+      <div class="module-form-wrapper overflow-scroll rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
+        <div class="code-editor-wrapper">
+          <div class="code-editor-top border-b border-gray-900/10">
+            <h2 class="code-editor-title text-base font-semibold leading-7 text-gray-900">Code editor</h2>
+            <button type="button" onclick="closeCodeEditor()" class="code-editor-close">
+              <i class="material-icons" style="font-size:20px;">close</i>
+            </button>
+          </div>
+          <div id="code-editor"></div>
+          <button type="submit" onclick="saveCodeEditor()" class="code-editor-save ml-4 inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Save</button>
+        </div>
+  
+
+      </div>
+    </div>
+  </div>

@@ -41,6 +41,11 @@ def home():
     return render_template('index.html', modules=modules)
 
 
+@app.route('/code_editor_overlay')
+def code_editor_overlay():
+    return render_template('code_editor_overlay.html')
+
+
 @app.route('/show_add_action_overlay')
 def show_add_action_overlay():
     module_str = request.args.get('module')
