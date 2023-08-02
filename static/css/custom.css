@@ -1,3 +1,7 @@
+.selected-page{
+    border-color: #2BD6B7;
+}
+
 .grid-container{
     padding-left: 2rem;
     padding-right: 2rem;
@@ -119,8 +123,8 @@
     position: absolute;
     height: 100%;
     border-radius: 8px;
-    background-color: rgb(192, 208, 219);
-    border: 1px solid lightgrey;
+    background-color: #2cc5a9;
+    border: 1px solid #29b399;
     padding: 5px 15px;
     display: flex;
     overflow: hidden;
@@ -131,11 +135,13 @@
 .timeline-action-method{
     display: flex;
     align-items: center;
+    color: white;
 }
 
 .timeline-action-times{
     text-align: left;
     font-size: 14;
+    color: white;
 }
 
 .timeline-action-delete{
@@ -146,17 +152,24 @@
     top: 5px;
     right: 5px;
     position: absolute;
+    color: white;
 }
 
 .timeline-action-title{
     margin-right: 10px;
     font-size: 14;
+    color: white;
 }
 
 .timeline-action-badge{
-    background-color: rgba(249, 250, 251, 0.5);
+    background-color: #37b59e;
+    outline: 1px solid #34a590;
     margin-right: 5px;
+    border-radius: 20px;
+    padding: 2px 5px;
+    font-size: 11;
     white-space: nowrap;
+    color: white;
 }
 
 #code-editor-overlay{
@@ -203,4 +216,14 @@
     right: 10px;
     bottom: 10px;
     z-index: 1000;
+}
+
+/*remove later on*/
+
+.bg-indigo-600{
+    background-color: #2BD6B7;
+}
+
+.bg-indigo-600:hover{
+        background-color: #2cc5a9;
 }

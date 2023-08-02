@@ -1,0 +1,42 @@
+[
+    {
+      "name": "Motor",
+      "connected": true,
+      "actions": [
+        {
+          "id": "lks42bej2fdpfqgk0",
+          "startTime": "00:00",
+          "endTime": "00:30",
+          "StartTimeoutId": 644,
+          "StopTimeoutId": 645,
+          "methods": {
+            "write": {
+              "function": "set_RPM",
+              "startData": "rpm 500",
+              "stopData": "rpm 0"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Spectroscope",
+      "connected": true,
+      "actions": [
+        {
+          "id": "lks45eqh1pq3dx4ew",
+          "startTime": "00:00",
+          "endTime": "00:30",
+          "StartTimeoutId": 646,
+          "StopTimeoutId": 647,
+          "methods": {
+            "read": {
+              "function": "read_fluorescence",
+              "format": "fluorescence",
+              "screen": "1"
+            }
+          }
+        }
+      ]
+    }
+  ]

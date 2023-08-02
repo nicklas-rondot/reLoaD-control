@@ -1,3 +1,7 @@
+.selected-page{
+    border-color: #2BD6B7;
+}
+
 .modules-grid{
     margin-top: 20px;
 }
@@ -26,4 +30,14 @@ form{
 
 .add-function{
     margin-top: 20px;
+}
+
+/*remove later on*/
+
+.bg-indigo-600{
+    background-color: #2BD6B7;
+}
+
+.bg-indigo-600:hover{
+        background-color: #2cc5a9;
 }
