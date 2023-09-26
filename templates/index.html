@@ -5,6 +5,7 @@
     <title>DiaDisc Dashboard</title>
     <link href="{{url_for('static',filename='css/main.css')}}" rel="stylesheet">
     <link href="{{url_for('static',filename='css/custom.css')}}" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/static/media/favicon.png">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <script src="https://unpkg.com/codeflask/build/codeflask.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -24,6 +25,45 @@
                   <!-- Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
                   <a href="#" class="selected-page border-indigo-500 text-gray-900 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium" aria-current="page">Dashboard</a>
                   <a href="/modules" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">Modules</a>
+                </div>
+              </div>
+              <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                <!--
+                <button type="button" class="relative rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                  <span class="absolute -inset-1.5"></span>
+                  <span class="sr-only">View notifications</span>
+                  <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                  </svg>
+                </button>
+                -->
+      
+                <!-- Profile dropdown -->
+                <div class="relative ml-3" id="user-profile">
+                  <div>
+                    <button type="button" class="relative flex max-w-xs items-center rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+                      <span class="absolute -inset-1.5"></span>
+                      <span class="sr-only">Open user menu</span>
+                      <img class="h-8 w-8 rounded-full" src="{{context.current_user.profile_pic}}" alt="">
+                    </button>
+                  </div>
+      
+                  <!--
+                    Dropdown menu, show/hide based on menu state.
+      
+                    Entering: "transition ease-out duration-200"
+                      From: "transform opacity-0 scale-95"
+                      To: "transform opacity-100 scale-100"
+                    Leaving: "transition ease-in duration-75"
+                      From: "transform opacity-100 scale-100"
+                      To: "transform opacity-0 scale-95"
+                  -->
+                  <div id="user-profile-dropdown" class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
+                    <!-- Active: "bg-gray-100", Not Active: "" -->
+                    <a href="#" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-0">Your Profile</a>
+                    <a href="#" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-1">Settings</a>
+                    <a href="#" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-2">Sign out</a>
+                  </div>
                 </div>
               </div>
 
@@ -157,7 +197,7 @@
             <!-- Results, show/hide based on command palette state -->
             <ul class="max-h-72 scroll-py-2 overflow-y-auto py-2 text-sm text-gray-800" id="options" role="listbox">
               <!-- Active: "bg-indigo-600 text-white" -->
-              {% for module in modules %}
+              {% for module in context.modules %}
               <li class="cursor-default select-none px-4 py-2 hover:bg-blue-600 hover:text-white" id="option-1" role="option" tabindex="-1" onclick="addModule('{{module.name}}')">{{module.name}}</li>
               {% endfor %}
             </ul>
@@ -211,8 +251,14 @@
     function saveCodeEditor(){
       timelineJson = JSON.parse(flask.getCode());
       closeCodeEditor();
+      clearTimeline();
       buildTimeline();
       timelineDataToLocalstorage();
+    }
+
+    function clearTimeline(){
+      moduleList.innerHTML = '';
+      timelineRows.innerHTML = '';
     }
 
     function buildTimeline(){
@@ -361,6 +407,12 @@
     }
 
     function showAddActionOverlay(module){
+        try{
+        document.getElementById('action-overlay').remove()
+        }
+        catch{
+        }
+
         console.log('show add action overlay')
         fetch(`/show_add_action_overlay?module=${module}`)
         .then(response => response.text())
@@ -392,9 +444,50 @@
         .catch(error => console.error('Error fetching overlay content:', error));
     }
 
+    function isValildTimeFormat(timeString) {
+      // Regular expression to match the MM:SS format
+      const timeRegex = /^\d{1,2}:\d{2}$/;
+
+      if (!timeRegex.test(timeString)) {
+        return false;
+      }
+
+      // Splitting the timeString into minutes and seconds
+      const [minutes, seconds] = timeString.split(':');
+
+      // Converting minutes and seconds to integers
+      const parsedMinutes = parseInt(minutes, 10);
+      const parsedSeconds = parseInt(seconds, 10);
+
+      // Checking if minutes and seconds are within valid ranges
+      if (parsedMinutes < 0 || parsedMinutes > 59 || parsedSeconds < 0 || parsedSeconds > 59) {
+        return false;
+      }
+
+      return true;
+    }
+
+
     function addAction(module){
       const startTime = document.getElementById('start-time').value
       const endTime = document.getElementById('end-time').value
+
+      if (!isValildTimeFormat(startTime)){
+        document.getElementById('start-time').style.outline = "1px solid red";
+        return;
+      }
+      else{
+        document.getElementById('start-time').style.outline = "none";
+      }
+
+      if (!isValildTimeFormat(endTime)){
+        document.getElementById('end-time').style.outline = "1px solid red";
+        return;
+      }
+      else{
+        document.getElementById('end-time').style.outline = "none";
+      }
+
       const id = Date.now().toString(36) + Math.floor(Math.pow(10, 12) + Math.random() * 9*Math.pow(10, 12)).toString(36)
 
       let actionJson = {
@@ -409,6 +502,20 @@
       let writeSelect = document.getElementById(`function-write-select`)
       let writeFunctionName = writeSelect.options[writeSelect.selectedIndex].text
 
+      let readSelect = document.getElementById(`function-read-select`)
+      let readFunctionName = readSelect.options[readSelect.selectedIndex].text
+      console.log(readFunctionName)
+
+      if(writeFunctionName == "-- select an option --" && readFunctionName == "-- select an option --"){
+        writeSelect.style.outline = "1px solid red";
+        readSelect.style.outline = "1px solid red";
+        return;
+      }
+      else{
+        writeSelect.style.outline = "none";
+        readSelect.style.outline = "none";
+      }
+
       let writeVariableStr = ""
 
       let i = 1
@@ -417,6 +524,13 @@
         try{
           let variable_name = document.getElementById(`variable-write-name-${i}`).textContent
           let variable_value = document.getElementById(`variable-write-value-${i}`).value
+          if(!variable_value){
+            document.getElementById(`variable-write-value-${i}`).style.outline = "1px solid red";
+            return;
+          }
+          else{
+            document.getElementById(`variable-write-value-${i}`).style.outline = "none";
+          }
           if(writeVariableStr != ""){
             writeVariableStr += " "
           }
@@ -438,10 +552,6 @@
       }
 
 
-
-      let readSelect = document.getElementById(`function-read-select`)
-      let readFunctionName = readSelect.options[readSelect.selectedIndex].text
-
       let readVariableStr = ""
       let selectedScreen
 
@@ -450,6 +560,13 @@
       try{
           let screenSelect = document.getElementById(`function-read-select-screen`)
           selectedScreen = screenSelect.options[screenSelect.selectedIndex].value
+          if(selectedScreen == "-- select a screen --"){
+            screenSelect.style.outline = "1px solid red";
+            return;
+          }
+          else{
+            screenSelect.style.outline = "none";
+          }
       }
       catch{
         index_exists = false
@@ -612,7 +729,7 @@
     function blRead(device, format, screen) {
       console.log(`Reading data from ${device} with format: ${format}`);
 
-      const oldScreenIndex = screens.findIndex(screen => screen.id === screen)
+      const oldScreenIndex = screens.findIndex(old_screen => old_screen.id === screen)
       if(oldScreenIndex !== -1){
         console.log(`Killing old chart on screen ${screen}`);
         screens[oldScreenIndex].chartInstance.destroy()
@@ -672,10 +789,14 @@
               blSend(device, startData);
             }, startTime);
 
-            // Trigger bleSend at endTime with stopData
-            action.StopTimeoutId = setTimeout(() => {
-              blSend(device, stopData);
-            }, endTime);
+            let next_action_index = entry.actions.findIndex(next_action => next_action.startTime === action.endTime)
+
+            if(next_action_index == -1){
+              // Trigger bleSend at endTime with stopData
+              action.StopTimeoutId = setTimeout(() => {
+                blSend(device, stopData);
+              }, endTime);
+            }
           }
 
           if (action.methods.hasOwnProperty('read')) {
@@ -999,15 +1120,16 @@
               enabled: true,
               easing: 'linear',
               dynamicAnimation: {
-                  speed: 1000
+                speed: 1000
               }
               },
               toolbar: {
-              show: false
+                show: false
               },
               zoom: {
-              enabled: false
-              }
+                enabled: false
+              },
+              height: '100%',
           },
           dataLabels: {
               enabled: false

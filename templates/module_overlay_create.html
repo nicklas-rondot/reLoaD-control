@@ -47,15 +47,15 @@
               <p class="mt-1 text-sm leading-6 text-gray-600">Define the capabilites of the module</p>
         
               <div id="functions" class="mt-4 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
-                <div class="sm:col-span-2">
-                  <label for="variables-1" class="block text-sm font-medium leading-6 text-gray-900">Name</label>
+                <div class="sm:col-span-2" id="wrapper-name-1">
+                  <label for="variables-1" id="label-variables-1" class="block text-sm font-medium leading-6 text-gray-900">Name</label>
                   <div class="mt-2">
                     <input type="text" name="name-1" id="name-1" placeholder="Your name for this function" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
                   </div>
                 </div>
 
-                <div class="sm:col-span-2">
-                  <label for="method-1" class="block text-sm font-medium leading-6 text-gray-900">Method (Read/Write)</label>
+                <div class="sm:col-span-1" id="wrapper-method-1">
+                  <label for="method-1" id="label-method-1" class="block text-sm font-medium leading-6 text-gray-900">Method (Read/Write)</label>
                   <div class="mt-2">
                     <select id="method-1" name="method-1" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 placeholder:text-sm focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
                       <option>Read</option>
@@ -64,11 +64,18 @@
                   </div>
                 </div>
         
-                <div class="sm:col-span-2">
-                  <label for="variables-1" class="block text-sm font-medium leading-6 text-gray-900">Variables (comma seperated, no spaces)</label>
+                <div class="sm:col-span-2" id="wrapper-variables-1">
+                  <label for="variables-1" id="label-variables-1" class="block text-sm font-medium leading-6 text-gray-900">Variables (seperated by spaces)</label>
                   <div class="mt-2">
                     <input type="text" name="variables-1" id="variables-1" placeholder="Variable1,Variable2,Variable3" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
                   </div>
+                </div>
+
+                <div class="sm:col-span-1" id="wrapper-delete-button-1">
+                  <button type="button" onclick="deleteFunction('1')" id="delete-button-1" style="margin-top: 2.1rem"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  </button>
                 </div>
               </div>
               <button type="button" onclick="addFunction()" class="add-function rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:ring-gray-400">Add function</button>

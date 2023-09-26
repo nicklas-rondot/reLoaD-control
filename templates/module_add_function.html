@@ -1,13 +1,13 @@
 
-<div class="sm:col-span-2">
-    <label for="variables-{{ functionCount }}" class="block text-sm font-medium leading-6 text-gray-900">Name</label>
+<div class="sm:col-span-2" id="wrapper-name-{{ functionCount }}">
+    <label for="variables-{{ functionCount }}" id="label-name-{{ functionCount }}" class="block text-sm font-medium leading-6 text-gray-900">Name</label>
     <div class="mt-2">
         <input type="text" name="name-{{ functionCount }}" id="name-{{ functionCount }}" placeholder="Your name for this function" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
     </div>
 </div>
 
-<div class="sm:col-span-2">
-    <label for="method-{{ functionCount }}" class="block text-sm font-medium leading-6 text-gray-900">Method (Read/Write)</label>
+<div class="sm:col-span-1" id="wrapper-method-{{ functionCount }}">
+    <label for="method-{{ functionCount }}" id="label-method-{{ functionCount }}" class="block text-sm font-medium leading-6 text-gray-900">Method (Read/Write)</label>
     <div class="mt-2">
         <select id="method-{{ functionCount }}" name="method-{{ functionCount }}" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 placeholder:text-sm focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
             <option>Read</option>
@@ -16,9 +16,16 @@
     </div>
 </div>
 
-<div class="sm:col-span-2">
-    <label for="variables-{{ functionCount }}" class="block text-sm font-medium leading-6 text-gray-900">Variables (comma separated, no spaces)</label>
+<div class="sm:col-span-2" id="wrapper-variables-{{ functionCount }}">
+    <label for="variables-{{ functionCount }}" id="label-variables-{{ functionCount }}"" class="block text-sm font-medium leading-6 text-gray-900">Variables (comma separated, no spaces)</label>
     <div class="mt-2">
         <input type="text" name="variables-{{ functionCount }}" id="variables-{{ functionCount }}" placeholder="Variable1,Variable2,Variable3" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
     </div>
 </div>
+
+<div class="sm:col-span-1" id="wrapper-delete-button-{{functionCount}}">
+    <button type="button" onclick="deleteFunction('{{functionCount}}')" id="delete-button-{{functionCount}}" style="margin-top: 2.1rem"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+    </button>
+  </div>

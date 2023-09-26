@@ -24,7 +24,7 @@
       -->
       <div class="module-form-wrapper overflow-scroll rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
   
-        <form action="/create_module" method="post">
+        <form action="/save_module" method="post">
           <div class="module-form-inner-wraper space-y-4">
             <div class="border-b border-gray-900/10 pb-8">
               <h2 class="text-base font-semibold leading-7 text-gray-900">Edit module</h2>
@@ -47,29 +47,38 @@
               <p class="mt-1 text-sm leading-6 text-gray-600">Define the capabilites of the module</p>
         
               <div id="functions" class="mt-4 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
-                <div class="sm:col-span-2">
-                  <label for="variables-1" class="block text-sm font-medium leading-6 text-gray-900">Name</label>
-                  <div class="mt-2">
-                    <input type="text" name="name-1" id="name-1" placeholder="Your name for this function" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
+                {% for function in module.functions %}
+                  <div class="sm:col-span-2" id="wrapper-name-{{loop.index}}">
+                    <label for="name-{{loop.index}}" id="label-name-{{loop.index}}" class="block text-sm font-medium leading-6 text-gray-900">Name</label>
+                    <div class="mt-2">
+                      <input type="text" name="name-{{loop.index}}" id="name-{{loop.index}}" value="{{function.name}}" placeholder="Your name for this function" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
+                    </div>
                   </div>
-                </div>
 
-                <div class="sm:col-span-2">
-                  <label for="method-1" class="block text-sm font-medium leading-6 text-gray-900">Method (Read/Write)</label>
-                  <div class="mt-2">
-                    <select id="method-1" name="method-1" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 placeholder:text-sm focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                      <option>Read</option>
-                      <option>Write</option>
-                    </select>
+                  <div class="sm:col-span-1" id="wrapper-method-{{loop.index}}">
+                    <label for="method-{{loop.index}}" id="label-method-{{loop.index}}" class="block text-sm font-medium leading-6 text-gray-900">Method (Read/Write)</label>
+                    <div class="mt-2">
+                      <select id="method-{{loop.index}}" name="method-{{loop.index}}" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 placeholder:text-sm focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                        <option {%if function.method == "Read"%}selected{%endif%}>Read</option>
+                        <option {%if function.method == "Write"%}selected{%endif%}>Write</option>
+                      </select>
+                    </div>
                   </div>
-                </div>
-        
-                <div class="sm:col-span-2">
-                  <label for="variables-1" class="block text-sm font-medium leading-6 text-gray-900">Variables (comma seperated, no spaces)</label>
-                  <div class="mt-2">
-                    <input type="text" name="variables-1" id="variables-1" placeholder="Variable1,Variable2,Variable3" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
+          
+                  <div class="sm:col-span-2" id="wrapper-variables-{{loop.index}}">
+                    <label for="variables-{{loop.index}}" id="label-variables-{{loop.index}}" class="block text-sm font-medium leading-6 text-gray-900">Variables (seperated by spaces)</label>
+                    <div class="mt-2">
+                      <input type="text" name="variables-{{loop.index}}" id="variables-{{loop.index}}" value="{%for variable in function.variables%}{{variable.name}} {%endfor%}" placeholder="Variable1,Variable2,Variable3" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
+                    </div>
                   </div>
-                </div>
+                  
+                  <div class="sm:col-span-1" id="wrapper-delete-button-{{loop.index}}">
+                    <button type="button" onclick="deleteFunction('{{loop.index}}')" id="delete-button-{{loop.index}}" style="margin-top: 2.1rem"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    </button>
+                  </div>
+                {% endfor %}
               </div>
               <button type="button" onclick="addFunction()" class="add-function rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:ring-gray-400">Add function</button>
             </div>
@@ -78,7 +87,7 @@
         
           <div class="module-form-buttons mt-6 flex items-center justify-end gap-x-6">
             <button type="button" onclick="hideCreateModuleOverlay()" class="text-sm font-semibold leading-6 text-gray-900">Cancel</button>
-            <button type="submit" onclick="createModule()" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save</button>
+            <button type="submit" onclick="saveModule()" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save</button>
           </div>
         </form>
   
