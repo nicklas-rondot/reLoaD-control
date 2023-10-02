@@ -41,12 +41,12 @@ login_manager.init_app(app)
 client = WebApplicationClient(GOOGLE_CLIENT_ID)
 
 
-class UserModel(db.Model):
+class User(UserMixin, db.Model):
     id = db.Column(db.String(128), primary_key=True)
     name = db.Column(db.String(128), nullable=False)
     email = db.Column(db.String(128), nullable=False)
     profile_pic = db.Column(db.String(2048), nullable=False)
-    modules = db.relationship('Module', backref='usermodel', lazy=True)
+    modules = db.relationship('Module', backref='user', lazy=True)
     
 
 class Module(db.Model):
@@ -55,7 +55,7 @@ class Module(db.Model):
                            server_default=func.now())
     name = db.Column(db.String(128), nullable=False)
     functions = db.relationship('Function', backref='module', lazy=True)
-    user_model_id = db.Column(db.String(128), db.ForeignKey('user_model.id'), nullable=False)
+    user_model_id = db.Column(db.String(128), db.ForeignKey('user.id'), nullable=False)
 
 class Function(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -74,34 +74,9 @@ class Variable(db.Model):
     function_id = db.Column(db.Integer, db.ForeignKey('function.id'), nullable=False)
 
 
-class User(UserMixin):
-    def __init__(self, id_, name, email, profile_pic):
-        self.id = id_
-        self.name = name
-        self.email = email
-        self.profile_pic = profile_pic
-
-    @staticmethod
-    def get(user_id):
-        user_obj = UserModel.query.filter_by(id=user_id).first()
-        if not user_obj:
-            return None
-
-        user = User(
-            id_=user_obj.id, name=user_obj.name, email=user_obj.email, profile_pic=user_obj.profile_pic
-        )
-        return user
-
-    @staticmethod
-    def create(id_, name, email, profile_pic):
-        user = UserModel(id=id_, name=name, email=email, profile_pic=profile_pic)
-        db.session.add(user)
-        db.session.commit()
-
-
 @login_manager.user_loader
 def load_user(user_id):
-    return User.get(user_id)
+    return User.query.get(user_id)
 
 
 def get_google_provider_cfg():
@@ -158,21 +133,23 @@ def callback():
     # The user authenticated with Google, authorized your
     # app, and now you've verified their email through Google!
     if userinfo_response.json().get("email_verified"):
-        unique_id = userinfo_response.json()["sub"]
-        users_email = userinfo_response.json()["email"]
+        user_id = userinfo_response.json()["sub"]
+        email = userinfo_response.json()["email"]
         picture = userinfo_response.json()["picture"]
-        users_name = userinfo_response.json()["given_name"]
+        name = userinfo_response.json()["given_name"]
     else:
         return "User email not available or not verified by Google.", 400
     # Create a user in your db with the information provided
     # by Google
-    user = User(
-        id_=unique_id, name=users_name, email=users_email, profile_pic=picture
-    )
+    user = User.query.get(user_id)
+    print(user)
 
     # Doesn't exist? Add it to the database.
-    if not User.get(unique_id):
-        User.create(unique_id, users_name, users_email, picture)
+    if not user:
+        user = User(id=user_id, name=name, email=email, profile_pic=picture)
+
+    db.session.add(user)
+    db.session.commit()
 
     # Begin user session by logging the user in
     login_user(user)
