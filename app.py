@@ -180,6 +180,7 @@ def callback():
     # Send user back to homepage
     return redirect(url_for("index"))
 
+
 @app.route("/logout")
 @login_required
 def logout():
@@ -187,16 +188,17 @@ def logout():
     return redirect(url_for("index"))
 
 
-
 @app.route('/')
 def index():
-    if current_user.is_authenticated:
-        modules = Module.query.all()
-        context = {'modules': modules, 'current_user': current_user}
-
-        return render_template('index.html', context=context)
-    else:
+    if not current_user.is_authenticated:
         return '<a class="button" href="/login">Google Login</a>'
+    modules = Module.query.all()
+    context = {
+        'modules': modules, 
+        'current_user': current_user,
+    }
+
+    return render_template('index.html', context=context)
 
 
 @app.route('/code_editor_overlay')
@@ -222,9 +224,15 @@ def add_function_variables():
 
 @app.route('/modules')
 def modules():
+    if not current_user.is_authenticated:
+        return '<a class="button" href="/login">Google Login</a>'
     modules = Module.query.all()
+    context = {
+        'modules': modules, 
+        'current_user': current_user,
+    }
 
-    return render_template('modules.html', modules=modules)
+    return render_template('modules.html', context=context)
 
 
 @app.route('/create_module_overlay')
@@ -364,11 +372,23 @@ def delete_module():
 
     # Create the module and add it to the database
     module = Module.query.filter_by(name=module_name, user_model_id=current_user.id).first()
+    functions = Function.query.filter_by(module_id=module.id)
+    for function in functions:
+        variables = Variable.query.filter_by(function_id=function.id)
+        variables.delete()
+    functions.delete()
     db.session.delete(module)
 
     db.session.commit()
 
     return redirect(url_for('modules'))
+
+
+@app.route("/home")
+@login_required
+def home():
+    context = {}
+    return render_template('home.html', context=context)
 
 
 if __name__ == '__main__':

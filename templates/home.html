@@ -1,0 +1,114 @@
+<link rel="stylesheet" type="text/css" href="{{url_for('static',filename='css/home.css')}}">
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/media/logos/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <title>DiaDisc</title>
+</head>
+
+<div class=" background background--custom">
+  <canvas id="canvas" />
+</div>
+<img class="background background-frame" src="/static/media/background.svg" alt="">
+
+
+<div id="main-wrapper">
+    <div id="main">
+        <img id="logo" src="/static/media/diadisc-logo-large.png" alt="">
+        <div class="section1">
+            <div class="waitlist" id="waitlist">
+                <h1 class="waitlist-title">Your health.<br>Your right to know.</h1>
+                <p class="waitlist-text">Never be uncertain again about what your symptoms might mean. We are developing a medical voice assistant that puts your health in your hands.</p>
+                <form class="wailtlist-signup" id="waitlist-signup">
+                    <input class="waitlist-input" name="email" id="waitlist-input" type="email" placeholder="Your Email" required="required">
+                    <button class="waitlist-button" type="submit">Be the first</button>
+                </form>
+                <p class="waitlist-competition">Join our waitlist get the chance to win a 20€ Amazon gift card</p>
+            </div>
+            <div class="waitlist-success">
+
+            </div>
+            <img class="thumbnail" src="/media/home/iphone.svg" alt="">
+        </div>
+        <div class="university-logos">
+            <img class="university-logo" src="/static/media/kit.svg" alt="">
+        </div>
+    </div>
+</div>
+
+<footer>
+</footer>
+
+
+<style>
+
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/gh/greentfrapp/pocoloco@minigl/minigl.js"></script>
+<script>
+    function getCsrfCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCsrfCookie('csrftoken');
+
+    var gradient = new Gradient();
+    gradient.initGradient("#canvas");
+
+
+    function joinWaitlist(){
+
+        let email = document.getElementById('waitlist-input').value
+        $.ajax({
+            type: 'POST',
+            url: '/create_waitlist_user/',
+            dataType: 'json',
+            data: {
+                'csrfmiddlewaretoken': '{{csrf_token}}',
+                'email': email,
+                'code': '{{code}}',
+            },
+            success: function(response) {$('#waitlist').html(response)}
+        })
+    }
+
+    function copyLink(){
+        let copyText = document.getElementById('waitlist-success-input')
+
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); // For mobile devices
+
+        navigator.clipboard.writeText(copyText.value);
+
+        let button = document.getElementById('waitlist-success-copy')
+        button.innerHTML = 'Copied!'
+
+    }
+
+    $(document).ready(function() {
+      $('form').on('submit', function(e){
+          e.preventDefault();
+          joinWaitlist()
+      });
+    });
+</script>

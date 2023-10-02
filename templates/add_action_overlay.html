@@ -1,91 +1,91 @@
-      <!--Add Action Overlay-->
+<!--Add Action Overlay-->
 
-      <div id="action-overlay" class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
-        <!--
-          Slide-over panel, show/hide based on slide-over state.
+<div id="action-overlay" class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+  <!--
+    Slide-over panel, show/hide based on slide-over state.
 
-          Entering: "transform transition ease-in-out duration-500 sm:duration-700"
-            From: "translate-x-full"
-            To: "translate-x-0"
-          Leaving: "transform transition ease-in-out duration-500 sm:duration-700"
-            From: "translate-x-0"
-            To: "translate-x-full"
-        -->
-        <div class="pointer-events-auto w-screen max-w-md">
-          <div class="flex h-full flex-col divide-y divide-gray-200 bg-white shadow-xl">
-            <div class="flex min-h-0 flex-1 flex-col overflow-y-scroll py-6">
-              <div class="px-4 sm:px-6">
-                <div class="flex items-start justify-between">
-                  <h2 class="text-base font-semibold leading-6 text-gray-900" id="slide-over-title">Add action for {{module.name}}</h2>
-                  <div class="ml-3 flex h-7 items-center">
-                    <button type="button" onclick="closeAddActionOverlay()" class="relative rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                      <span class="absolute -inset-2.5"></span>
-                      <span class="sr-only">Close panel</span>
-                      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div class="relative mt-6 flex-1 px-4 sm:px-6">
-                
-                <!-- Your content -->
-                
-                <div id="times" class="mt-2 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
-                  <div class="sm:col-span-3">
-                    <label for="start-time" class="block text-sm font-medium leading-6 text-gray-900">Start time</label>
-                    <div class="mt-2">
-                      <input type="text" name="start-time" id="start-time" placeholder="00:00" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
-                    </div>
-                  </div>
-          
-                  <div class="sm:col-span-3">
-                    <label for="end-time" class="block text-sm font-medium leading-6 text-gray-900">End time</label>
-                    <div class="mt-2">
-                      <input type="text" name="end-time" id="end-time" placeholder="00:00" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="border-b border-t border-gray-900/10 pb-6 mt-4">
-
-                  <h2 class="text-base font-semibold leading-7 text-gray-900 mt-2">Functions</h2>
-            
-                  <div id="functions" class="mt-4 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
-                    <div id="function-write" class="sm:col-span-6">
-                      <label for="function-write-select" class="block text-m font-medium leading-6 text-gray-900">Write function</label>
-                      <div class="mt-2">
-                        <select id="function-write-select" onchange="addFunctionVariables('write')" name="function-write-select" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 placeholder:text-sm focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                          <option hidden disabled selected value> -- select an option -- </option>
-                          {% for function in module.functions if function.method == 'Write' %}
-                          <option>{{function.name}}</option>
-                          {% endfor %}
-                        </select>
-                      </div>
-                    </div>
-
-                    <div id="function-read" class="sm:col-span-6 mt-4">
-                      <label for="function-read-select" class="block text-m font-medium leading-6 text-gray-900">Read function</label>
-                      <div class="mt-2">
-                        <select id="function-read-select" onchange="addFunctionVariables('read')" name="function-read-select" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 placeholder:text-sm focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                          <option hidden disabled selected value> -- select an option -- </option>
-                          {% for function in module.functions if function.method == 'Read' %}
-                          <option>{{function.name}}</option>
-                          {% endfor %}
-                        </select>
-                      </div>
-                    </div>
-
-                </div>
-
-
-              </div>
-            </div>
-            <div class="flex flex-shrink-0 justify-end px-4 py-4">
-              <button type="button" onclick="closeAddActionOverlay()" class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:ring-gray-400">Cancel</button>
-              <button type="submit" onclick="addAction('{{module.name}}')" class="ml-4 inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Save</button>
+    Entering: "transform transition ease-in-out duration-500 sm:duration-700"
+      From: "translate-x-full"
+      To: "translate-x-0"
+    Leaving: "transform transition ease-in-out duration-500 sm:duration-700"
+      From: "translate-x-0"
+      To: "translate-x-full"
+  -->
+  <div class="pointer-events-auto w-screen max-w-md">
+    <div class="flex h-full flex-col divide-y divide-gray-200 bg-white shadow-xl">
+      <div class="flex min-h-0 flex-1 flex-col overflow-y-scroll py-6">
+        <div class="px-4 sm:px-6">
+          <div class="flex items-start justify-between">
+            <h2 class="text-base font-semibold leading-6 text-gray-900" id="slide-over-title">Add action for {{module.name}}</h2>
+            <div class="ml-3 flex h-7 items-center">
+              <button type="button" onclick="closeAddActionOverlay()" class="relative rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <span class="absolute -inset-2.5"></span>
+                <span class="sr-only">Close panel</span>
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
+        <div class="relative mt-6 flex-1 px-4 sm:px-6">
+          
+          <!-- Your content -->
+          
+          <div id="times" class="mt-2 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
+            <div class="sm:col-span-3">
+              <label for="start-time" class="block text-sm font-medium leading-6 text-gray-900">Start time</label>
+              <div class="mt-2">
+                <input type="text" name="start-time" id="start-time" placeholder="00:00" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
+              </div>
+            </div>
+    
+            <div class="sm:col-span-3">
+              <label for="end-time" class="block text-sm font-medium leading-6 text-gray-900">End time</label>
+              <div class="mt-2">
+                <input type="text" name="end-time" id="end-time" placeholder="00:00" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
+              </div>
+            </div>
+          </div>
+          
+          <div class="border-b border-t border-gray-900/10 pb-6 mt-4">
+
+            <h2 class="text-base font-semibold leading-7 text-gray-900 mt-2">Functions</h2>
+      
+            <div id="functions" class="mt-4 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
+              <div id="function-write" class="sm:col-span-6">
+                <label for="function-write-select" class="block text-m font-medium leading-6 text-gray-900">Write function</label>
+                <div class="mt-2">
+                  <select id="function-write-select" onchange="addFunctionVariables('write')" name="function-write-select" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 placeholder:text-sm focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                    <option hidden disabled selected value> -- select an option -- </option>
+                    {% for function in module.functions if function.method == 'Write' %}
+                    <option>{{function.name}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+
+              <div id="function-read" class="sm:col-span-6 mt-4">
+                <label for="function-read-select" class="block text-m font-medium leading-6 text-gray-900">Read function</label>
+                <div class="mt-2">
+                  <select id="function-read-select" onchange="addFunctionVariables('read')" name="function-read-select" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 placeholder:text-sm focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                    <option hidden disabled selected value> -- select an option -- </option>
+                    {% for function in module.functions if function.method == 'Read' %}
+                    <option>{{function.name}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+
+          </div>
+
+
+        </div>
       </div>
+      <div class="flex flex-shrink-0 justify-end px-4 py-4">
+        <button type="button" onclick="closeAddActionOverlay()" class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:ring-gray-400">Cancel</button>
+        <button type="submit" onclick="addAction('{{module.name}}')" class="ml-4 inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
