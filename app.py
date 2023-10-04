@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, request
+from flask import Flask, render_template, request, jsonify, redirect, url_for, request, flash
 from flask_sqlalchemy import SQLAlchemy
 import os
 import json
 from sqlalchemy.sql import func
 from flask_migrate import Migrate
 from flask import Flask, redirect, request, url_for
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import (
     LoginManager,
     current_user,
@@ -16,6 +17,7 @@ from oauthlib.oauth2 import WebApplicationClient
 import requests
 from flask_login import UserMixin
 from dotenv import load_dotenv
+import uuid
 
 load_dotenv()
 
@@ -44,9 +46,10 @@ client = WebApplicationClient(GOOGLE_CLIENT_ID)
 class User(UserMixin, db.Model):
     id = db.Column(db.String(128), primary_key=True)
     name = db.Column(db.String(128), nullable=False)
-    email = db.Column(db.String(128), nullable=False)
+    email = db.Column(db.String(128), nullable=False, unique=True)
     profile_pic = db.Column(db.String(2048), nullable=False)
-    modules = db.relationship('Module', backref='user', lazy=True)
+    password = db.Column(db.String(2048))
+    modules = db.relationship('Module', backref='user', lazy=True)  
     
 
 class Module(db.Model):
@@ -74,6 +77,8 @@ class Variable(db.Model):
     function_id = db.Column(db.Integer, db.ForeignKey('function.id'), nullable=False)
 
 
+login_manager.login_view = 'login'
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
@@ -83,15 +88,15 @@ def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
 
 
-@app.route("/login")
-def login():
-
+@app.route("/auth_google")
+def auth_google():
     # Find out what URL to hit for Google login
     google_provider_cfg = get_google_provider_cfg()
     authorization_endpoint = google_provider_cfg["authorization_endpoint"]
 
     # Use library to construct the request for Google login and provide
     # scopes that let you retrieve user's profile from Google
+    print(request.base_url)
     request_uri = client.prepare_request_uri(
         authorization_endpoint,
         redirect_uri=request.base_url + "/callback",
@@ -99,8 +104,8 @@ def login():
     )
     return redirect(request_uri)
 
-@app.route("/login/callback")
-def callback():
+@app.route("/auth_google/callback")
+def callback_google():
     # Get authorization code Google sent back to you
     code = request.args.get("code")
     # Find out what URL to hit to get tokens that allow you to ask for
@@ -158,6 +163,71 @@ def callback():
     return redirect(url_for("index"))
 
 
+@app.route('/register')
+def register():
+
+    context = {}
+
+    return render_template('register.html', context=context)
+
+
+@app.route('/register', methods=['POST'])
+def register_post():
+
+        # code to validate and add user to database goes here
+    email = request.form.get('email')
+    name = request.form.get('name')
+    default_profile_pic = "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1287&q=80"
+    password = request.form.get('password')
+
+    user = User.query.filter_by(email=email).first() # if this returns a user, then the email already exists in database
+
+    if user: # if a user is found, we want to redirect back to signup page so user can try again
+        flash('Email address already exists')
+        return redirect(url_for('register'))
+
+    # create a new user with the form data. Hash the password so the plaintext version isn't saved.
+    new_user = User(id=str(uuid.uuid4()), email=email, name=name, profile_pic=default_profile_pic, password=generate_password_hash(password, method='sha256'))
+
+    # add the new user to the database
+    db.session.add(new_user)
+    db.session.commit()
+
+    login_user(new_user)
+
+    return redirect(url_for('index'))
+
+
+@app.route('/login')
+def login():
+
+    context = {}
+
+    return render_template('login.html', context=context)
+
+
+@app.route('/login', methods=['POST'])
+def login_post():
+
+    # login code goes here
+    email = request.form.get('email')
+    password = request.form.get('password')
+    #remember = True if request.form.get('remember') else False
+
+    user = User.query.filter_by(email=email).first()
+
+    # check if the user actually exists
+    # take the user-supplied password, hash it, and compare it to the hashed password in the database
+
+    if not user or not user.password or not check_password_hash(user.password, password):
+        flash('Please check your login details and try again.')
+        return redirect(url_for('login')) # if the user doesn't exist or password is wrong, reload the page
+
+    login_user(user)
+
+    return redirect(url_for('index'))
+
+
 @app.route("/logout")
 @login_required
 def logout():
@@ -166,9 +236,10 @@ def logout():
 
 
 @app.route('/')
+@login_required
 def index():
-    if not current_user.is_authenticated:
-        return '<a class="button" href="/login">Google Login</a>'
+    #if not current_user.is_authenticated:
+    #    return redirect(url_for('login'))
     modules = Module.query.all()
     context = {
         'modules': modules, 
@@ -202,7 +273,7 @@ def add_function_variables():
 @app.route('/modules')
 def modules():
     if not current_user.is_authenticated:
-        return '<a class="button" href="/login">Google Login</a>'
+        return '<a class="button" href="/auth_google">Google Login</a>'
     modules = Module.query.all()
     context = {
         'modules': modules, 
@@ -362,7 +433,6 @@ def delete_module():
 
 
 @app.route("/home")
-@login_required
 def home():
     context = {}
     return render_template('home.html', context=context)

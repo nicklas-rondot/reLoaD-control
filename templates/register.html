@@ -1,0 +1,129 @@
+<link rel="stylesheet" type="text/css" href="{{url_for('static',filename='css/auth.css')}}">
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/media/logos/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="{{url_for('static',filename='css/main.css')}}" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/static/media/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <title>DiaDisc</title>
+</head>
+
+<body>
+    
+<div class="background background--custom">
+  <canvas id="canvas" />
+</div>
+
+
+<div id="main-wrapper">
+    <div id="main">
+        <img id="logo" src="/static/media/diadisc-logo-large.png" alt="">
+        <h3 class="title">Create an account</h3>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="notification">
+                {{ messages[0] }}. <a class="link" href="{{ url_for('login') }}">Sign in</a>
+            </div>
+        {% endif %}
+        {% endwith %}
+        <form method="POST" action="/register">
+            <div class="input-group input-auth">
+                <input type="text" class="input" name="email" placeholder=" " required>
+                <label for="email">Email</label>
+            </div>
+            <div class="input-group input-auth">
+                <input type="text" class="input" name="name" placeholder=" " required>
+                <label for="name">Name</label>
+            </div>
+            <div class="input-group input-auth">
+                <input type="password" class="input" name="password" placeholder=" " required>
+                <label for="password">Password</label>
+            </div>
+            <button type="submit" class="auth-button">Register</button>
+        </form>
+        <p class="or"><span>or</span></p>
+        <a href="/auth_google" class="google-sign-in-button" >Sign in with Google</a>
+    </div>
+    <p class="subtitle">Already have an account? <a class="link" href="/login">Sign in</a></p>
+</div>
+
+</body>
+
+
+
+<footer>
+</footer>
+
+
+<style>
+
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/gh/greentfrapp/pocoloco@minigl/minigl.js"></script>
+<script>
+    function getCsrfCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCsrfCookie('csrftoken');
+
+    var gradient = new Gradient();
+    gradient.initGradient("#canvas");
+
+    /*
+    function joinWaitlist(){
+
+        let email = document.getElementById('waitlist-input').value
+        $.ajax({
+            type: 'POST',
+            url: '/create_waitlist_user/',
+            dataType: 'json',
+            data: {
+                'csrfmiddlewaretoken': '{{csrf_token}}',
+                'email': email,
+                'code': '{{code}}',
+            },
+            success: function(response) {$('#waitlist').html(response)}
+        })
+    }
+
+    function copyLink(){
+        let copyText = document.getElementById('waitlist-success-input')
+
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); // For mobile devices
+
+        navigator.clipboard.writeText(copyText.value);
+
+        let button = document.getElementById('waitlist-success-copy')
+        button.innerHTML = 'Copied!'
+
+    }
+    
+    $(document).ready(function() {
+      $('form').on('submit', function(e){
+          e.preventDefault();
+          joinWaitlist()
+      });
+    });*/
+</script>
