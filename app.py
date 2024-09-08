@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 import json
 from sqlalchemy.sql import func
+from sqlalchemy import JSON
 from flask_migrate import Migrate
 from flask import Flask, redirect, request, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -50,6 +51,9 @@ class User(UserMixin, db.Model):
     profile_pic = db.Column(db.String(2048), nullable=False)
     password = db.Column(db.String(2048))
     modules = db.relationship('Module', backref='user', lazy=True)  
+
+    def __repr__(self):
+        return f'<User {self.email}>'
     
 
 class Module(db.Model):
@@ -60,6 +64,9 @@ class Module(db.Model):
     functions = db.relationship('Function', backref='module', lazy=True)
     user_model_id = db.Column(db.String(128), db.ForeignKey('user.id'), nullable=False)
 
+    def __repr__(self):
+        return f'<Module {self.name}>'
+
 class Function(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime(timezone=True),
@@ -67,7 +74,11 @@ class Function(db.Model):
     method = db.Column(db.String(10), nullable=False)
     name = db.Column(db.String(128), nullable=False, server_default='default')
     variables = db.relationship('Variable', backref='function', lazy=True)
+    datasets = db.relationship('Dataset', backref='function', lazy=True)
     module_id = db.Column(db.Integer, db.ForeignKey('module.id'), nullable=False)
+
+    def __repr__(self):
+        return f'<Function {self.name}>'
 
 class Variable(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -75,6 +86,45 @@ class Variable(db.Model):
                            server_default=func.now())
     name = db.Column(db.String(128), nullable=False, server_default='default')
     function_id = db.Column(db.Integer, db.ForeignKey('function.id'), nullable=False)
+
+    def __repr__(self):
+        return f'<Variable {self.name}>'
+
+class Application(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime(timezone=True),
+                           server_default=func.now())
+    name = db.Column(db.String(128), nullable=False)
+    timeline = db.Column(db.String(20000), nullable=True)
+    runs = db.relationship('Run', backref='application', lazy=True)
+    user_model_id = db.Column(db.String(128), db.ForeignKey('user.id'), nullable=False)
+
+    def __repr__(self):
+        return f'<Application {self.name}>'
+
+class Run(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime(timezone=True),
+                           server_default=func.now())
+    name = db.Column(db.String(128), nullable=False)
+    datasets = db.relationship('Dataset', backref='run', lazy=True)
+    application_id = db.Column(db.Integer, db.ForeignKey('application.id'), nullable=False)
+    user_model_id = db.Column(db.String(128), db.ForeignKey('user.id'), nullable=False)
+
+    def __repr__(self):
+        return f'<Run {self.name}>'
+
+class Dataset(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime(timezone=True),
+                           server_default=func.now())
+    name = db.Column(db.String(128), nullable=False)
+    run_id = db.Column(db.Integer, db.ForeignKey('run.id'), nullable=False)
+    function_id = db.Column(db.Integer, db.ForeignKey('function.id'), nullable=False)
+    user_model_id = db.Column(db.String(128), db.ForeignKey('user.id'), nullable=False)
+
+    def __repr__(self):
+        return f'<Dataset {self.name}>'
 
 
 login_manager.login_view = 'login'
@@ -102,6 +152,7 @@ def auth_google():
         redirect_uri=request.base_url + "/callback",
         scope=["openid", "email", "profile"],
     )
+    print(request_uri)
     return redirect(request_uri)
 
 @app.route("/auth_google/callback")
@@ -160,7 +211,7 @@ def callback_google():
     login_user(user)
 
     # Send user back to homepage
-    return redirect(url_for("index"))
+    return redirect(url_for("applications"))
 
 
 @app.route('/register')
@@ -234,19 +285,74 @@ def logout():
     logout_user()
     return redirect(url_for("index"))
 
-
-@app.route('/')
 @login_required
-def index():
-    #if not current_user.is_authenticated:
-    #    return redirect(url_for('login'))
+@app.route('/')
+def applications():
+    applications = Application.query.all()
+    context = {
+        'applications': applications, 
+        'current_user': current_user,
+    }
+
+    return render_template('applications.html', context=context)
+
+@app.route('/application')
+def application():
+    id_str = request.args.get('id')
+    if id_str == 'new':
+        application = Application(name=f'New Application', user_model_id=current_user.id)
+        db.session.add(application)
+        db.session.commit()
+        return redirect(f'/application?id={application.id}')
+    else:
+        application = Application.query.filter_by(id=id_str).first()
+    
     modules = Module.query.all()
     context = {
+        'application': application,
         'modules': modules, 
         'current_user': current_user,
     }
 
-    return render_template('index.html', context=context)
+    return render_template('application.html', context=context)
+
+
+@app.route('/edit_application_name', methods=['POST'])
+def edit_application_name():
+    id_str = request.args.get('id')
+    json_payload = request.json
+    name = json_payload['name']
+    application = Application.query.filter_by(id=id_str).first()
+    application.name = name
+    db.session.add(application)
+    db.session.commit()
+    return redirect(url_for('application', id=id_str))
+
+
+@app.route('/delete_application', methods=['POST', 'GET'])
+def delete_application():
+    # Get the data from the form
+    application_name = request.args.get('name')
+    print(application_name)
+
+    # Create the module and add it to the database
+    application = Application.query.filter_by(name=application_name, user_model_id=current_user.id).first()
+    db.session.delete(application)
+    db.session.commit()
+
+    return redirect(url_for('applications'))
+
+
+@app.route('/save_application_timeline', methods=['POST'])
+def save_application_timeline():
+    id_str = request.args.get('id')
+    json_payload = request.json
+    timeline = json_payload['timeline']
+    application = Application.query.filter_by(id=id_str).first()
+    application.timeline = timeline
+    db.session.add(application)
+    db.session.commit()
+    return redirect(url_for('application', id=id_str))
 
 
 @app.route('/code_editor_overlay')
@@ -272,8 +378,6 @@ def add_function_variables():
 
 @app.route('/modules')
 def modules():
-    if not current_user.is_authenticated:
-        return '<a class="button" href="/auth_google">Google Login</a>'
     modules = Module.query.all()
     context = {
         'modules': modules, 
@@ -430,6 +534,17 @@ def delete_module():
     db.session.commit()
 
     return redirect(url_for('modules'))
+
+
+@app.route('/playground')
+def playground():
+    modules = Module.query.all()
+    context = {
+        'modules': modules, 
+        'current_user': current_user,
+    }
+
+    return render_template('playground.html', context=context)
 
 
 @app.route("/home")

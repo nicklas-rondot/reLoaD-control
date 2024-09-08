@@ -1,0 +1,56 @@
+
+<div id="playground-content" class="playground-content" >
+  {% for module in context.modules %}
+    <div class="playground-module" id="playground-module-{{module.name}}">
+        <div class="playground-module-title-wrapper" id="playground-module-title-wrapper-{{module.id}}" onclick="showModuleFunctions('{{module.id}}')">
+              <p class="playground-module-title">{{module.name}}</p>
+              <span class="material-symbols-outlined playground-module-icon" id="playground-module-icon-{{module.id}}" style="color: grey;">expand_more</span>
+        </div>
+        <div class="playground-module-functions" id="playground-module-functions-{{module.id}}">
+        {% for function in module.functions %}
+          {% if function.method.lower() == 'write' %}
+          <div class="playground-function" id="playground-function-{{function.name}}">
+            <p class="playground-function-name">{{function.name}}</p>
+            <div id="playground-function-write-variables" class="function-variables mt-2 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
+                {% for variable in function.variables %}
+                <div class="sm:col-span-3">
+                  <label for="playground-variable-write-value-{{loop.index}}" id="playground-variable-write-name-{{loop.index}}" class="block text-sm font-medium leading-6 text-gray-900">{{variable.name}}</label>
+                  <div class="mt-2">
+                    <input type="text" name="playground-variable-write-value-{{loop.index}}" id="playground-variable-write-value-{{loop.index}}" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
+                  </div>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" onclick="runPlaygroundFunctionWrite('{{function.name}}', '{{module.name}}')" class="mt-2 rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Send</button>
+          </div>
+            {% endif %}
+
+          {% if function.method.lower() == 'read' %}
+          <div class="playground-function" id="playground-function-{{function.name}}">
+            <p class="playground-function-name">{{function.name}}</p>
+            <div id="playground-function-read-variables" class="function-variables mt-2 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
+                <div id="playground-function-read-select-screen-wrapper" class="sm:col-span-6">
+                    <label for="playground-function-read-select-screen" class="block text-m font-medium leading-6 text-gray-900">Select screen</label>
+                    <div class="mt-2">
+                        <select id="playground-function-read-select-screen" name="playground-function-read-select-screen" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 placeholder:text-sm focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                            <option hidden disabled selected value> -- select a screen -- </option>
+                            <option value="1">Screen 1</option>
+                            <option value="2">Screen 2</option>
+                            <option value="3">Screen 3</option>
+                        </select>
+                    </div>
+                </div>
+                {% for variable in function.variables %}
+                <div class="sm:col-span-3">
+                <p for="playground-variable-read-value-{{loop.index}}" id="playground-variable-read-name-{{loop.index}}" class="block text-sm font-medium leading-6 text-gray-900">{{variable.name}}</p>
+              </div>
+              {% endfor %}
+            </div>
+            <button type="button" onclick="runPlaygroundFunctionRead('{{function.name}}', '{{module.name}}')" class="mt-2 rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Send</button>
+          </div>
+            {% endif %}
+        {%endfor%}
+        </div>
+    </div>
+    {% endfor %}
+</div>

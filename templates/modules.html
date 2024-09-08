@@ -9,7 +9,6 @@
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
       <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
     </svg>
-    
     Create module
   </button>
 
@@ -62,11 +61,8 @@
     function addFunction() {
       console.log('add function');
       // Find the current function count
-      const functionContainers = document.getElementsByClassName('variables');
-      let functionCount = functionContainers.length;
-      if(functionCount == 0){
-        functionCount = 1
-      }
+      const functionContainers = document.getElementsByClassName('function-name');
+      let functionCount = functionContainers.length + 1;
 
       fetch(`/create_module_add_function?count=${functionCount}`)
           .then(response => response.text())

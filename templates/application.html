@@ -4,41 +4,51 @@
 
 {% extends "base.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl sm:px-6 lg:px-8 grid-container">
+<div class="mx-auto max-w-7xl sm:px-6 lg:px-8 grid-container target">
+  
+  <div class="top-row">
+    <h1>{{context.application.name}}</h1>
+    <button onclick="editName('{{context.application.id}}')"><span class="material-symbols-outlined" style="color: grey;">edit</span></button>
+  </div>
     
-  <div class="screen1">
-      <div id="chart1"></div>
-  </div>
-  <div class="screen2">
-    <div id="chart2"></div>
-  </div>
-  <div class="editor">
-      <div class="editor-left bg-gray-50">
-          <div class="editor-controls">
-              <button type="button" onclick="runTimeline()" class="control-button rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Run</button>
-              <button type="button" onclick="cancelTimeline()" class="control-button rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Cancel</button>
-          </div>
-          <div class="editor-modules">
-              <ul id="module-list">
+  <div class="editor box">
+    <div class="editor-left bg-gray-50">
+        <div class="editor-controls">
+            <button type="button" onclick="runTimeline()" class="control-button rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Run</button>
+            <button type="button" onclick="cancelTimeline()" class="control-button rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Cancel</button>
+        </div>
+        <div class="editor-modules">
+            <ul id="module-list">
 
-              </ul>
-              <button class="add-module-button hover:bg-gray-100" onclick="displayModuleSelector()">
-                  +
-              </button>
-          </div>
-      </div>
-      <div class="editor-right">
-          <div class="timeline-times">
-            <button type="button" onclick="openCodeEditor()" class="editor-button rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-              <i class="material-icons" style="font-size:20px;">code</i>
+            </ul>
+            <button class="add-module-button hover:bg-gray-100" onclick="displayModuleSelector()">
+                +
             </button>
-          </div>
-          <ul class="timeline-rows" id="timeline-rows">
-          </ul>
-      </div>
+        </div>
+    </div>
+    <div class="editor-right">
+        <div class="timeline-times">
+          <button type="button" onclick="openCodeEditor()" class="editor-button rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+            <i class="material-icons" style="font-size:20px;">code</i>
+          </button>
+        </div>
+        <ul class="timeline-rows" id="timeline-rows">
+        </ul>
+    </div>
   </div>
 
+  <div class="screen-row">
+    <div class="screen box" id="screen1">
+      <div id="chart1"></div>
+    </div>
+    <div class="screen box" id="screen2">
+      <div id="chart2"></div>
+    </div>
+    <div class="screen box" id="screen3">
+      <div id="chart3"></div>
+    </div>
 
+  </div>
 
 
   <!--Add Module Overlay-->
@@ -85,7 +95,16 @@
     </div>
   </div>
 
+  <div class="playground drag-handler" id="playground" class="">
+    <div class="playground-top-row" onclick="togglePlayground()">
+      <p id="playground-title">Playground</p>
+      <span class="material-symbols-outlined" style="color: grey;">expand_more</span>
+    </div>
+    {% include "playground.html" %}
+  </div>
+
 </div>
+
 
 <script>
     let timelineJson = []
@@ -149,6 +168,40 @@
           if (actionElement === null) addActionElement(module.name, action);
         }
       }
+
+      showScreens();
+    }
+
+    function showScreens(){
+
+      const screenValues = new Set();
+
+      function processActions(actions) {
+        actions.forEach(action => {
+          if (action.methods && action.methods.read && action.methods.read.screen) {
+            screenValues.add(action.methods.read.screen);
+          }
+        });
+      }
+
+      timelineJson.forEach(entry => {
+        if (entry.actions) {
+          processActions(entry.actions);
+        }
+      });
+
+      console.log(screenValues);
+      for (let i=1; i<=3; i++) {
+        let screenElement = document.getElementById(`screen${i}`);
+        if (screenValues.has(String(i))){
+          screenElement.style.display = 'block';
+        }
+        else{
+          screenElement.style.display = 'none';
+        }
+
+      }
+
     }
 
     function addModule(module){
@@ -393,6 +446,7 @@
         writeSelect.style.outline = "none";
         readSelect.style.outline = "none";
       }
+      console.log("decoding action variables")
 
       let writeVariableStr = ""
 
@@ -481,6 +535,7 @@
       console.log(timelineJson)
       addActionElement(module, actionJson)
       closeAddActionOverlay()
+      showScreens()
       timelineDataToLocalstorage()
     }
 
@@ -749,10 +804,41 @@
 
     function timelineDataToLocalstorage(){
       let timelineString = JSON.stringify(timelineJson)
-      localStorage.setItem('timeline_data', timelineString)
+      //localStorage.setItem('timeline_data', timelineString)
+
+      const url = `https://127.0.0.1:5000/save_application_timeline?id={{context.application.id}}`;
+
+      const headers = {
+          "Content-Type": "application/json"
+      };
+
+      const payload = {
+          'timeline': timelineString,
+
+      };
+
+      fetch(url, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify(payload)
+      })
+      .then(response => {
+          console.log(response.status);
+      })
+      .catch(error => {
+          console.error(error);
+      });
     }
 
     function getTimelineData(){
+      try {
+          timelineJson = JSON.parse('{{context.application.timeline|safe}}');
+          console.log(timelineJson)
+          buildTimeline()
+        } catch (error) {
+          console.log('Error parsing stored data:', error);
+        }
+      /*
       let timelineString = localStorage.getItem('timeline_data');
       if (timelineString) {
         try {
@@ -761,12 +847,18 @@
         } catch (error) {
           console.error('Error parsing stored data:', error);
         }
-      }
+      }*/
+      
     }
+    
 
 
     // -------------------
     // Bluetooth
+    /*
+    const serviceUUID = "90D3D000-C950-4DD6-9410-2B7AEB1DD7D8".toLowerCase();
+    const characteristicUUID = "90D3D000-C950-4DD6-9410-2B7AEB1DD7D9".toLowerCase();
+
     let devices = [];
 
     function connect(deviceName) {
@@ -796,7 +888,8 @@
 
       return navigator.bluetooth
         .requestDevice({
-          filters: [{ services: [0xFFE0] }],
+          acceptAllDevices: true,
+          optionalServices: [serviceUUID],
         })
         .then(device => {
           console.log('"' + device.name + '" bluetooth device selected');
@@ -838,11 +931,11 @@
         .connect()
         .then(server => {
           console.log('GATT server connected, getting service...');
-          return server.getPrimaryService(0xFFE0);
+          return server.getPrimaryService(serviceUUID);
         })
         .then(service => {
           console.log('Service found, getting characteristic...');
-          return service.getCharacteristic(0xFFE1);
+          return service.getCharacteristic(characteristicUUID);
         })
         .then(characteristic => {
           console.log('Characteristic found');
@@ -910,7 +1003,7 @@
       let value = new TextDecoder().decode(event.target.value);
       let screen = screens.find(screen => screen.display === deviceName) || null;
 
-      console.log("received data")
+      console.log(`received data: ${value}`)
 
       if (!screen) {
         console.log("Screen with display name '" + deviceName + "' not found.");
@@ -959,6 +1052,7 @@
         let chunks = data.match(/(.|[\r\n]){1,20}/g);
 
         writeToCharacteristic(device.characteristic, chunks[0]);
+        console.log("wrote to characteristic")
 
         for (let i = 1; i < chunks.length; i++) {
           setTimeout(() => {
@@ -974,7 +1068,9 @@
 
     function writeToCharacteristic(characteristic, data) {
       characteristic.writeValue(new TextEncoder().encode(data));
+      console.log("wrote to characteristic")
     }
+      */
 
     // ------------------------
     // Charts
@@ -1026,7 +1122,9 @@
               }
           },
           yaxis: {
-              max: 100
+              max: 1000,
+              min: 0,
+              logarithmic: true,
           },
           legend: {
               show: false
@@ -1083,8 +1181,172 @@
       screen.chartInstance.updateSeries(newSeries);
     }
 
+    function editName(id){
+      let name = prompt("Enter a new name for the application", "{{context.application.name}}");
+      if (name != null) {
+        document.querySelector('h1').textContent = name;
+      }
+      const url = `https://127.0.0.1:5000/edit_application_name?id=${id}`;
+
+      const headers = {
+          "Content-Type": "application/json"
+      };
+
+      const payload = {
+          'name': name,
+
+      };
+
+      fetch(url, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify(payload)
+      })
+      .then(response => {
+          console.log(response.status);
+      })
+      .catch(error => {
+          console.error(error);
+      });
+
+    }
 
 
+    function dragHandler() {
+      $(".drag-handler").resizable();
+      $(".drag-handler").draggable(); 
+    }
+
+    function togglePlayground(){
+      let playgroundElement = document.getElementById('playground')
+      let playgroundContent = document.getElementById('playground-content')
+      if(playgroundElement.classList.contains('playground-expanded')){
+        playgroundElement.classList.remove('playground-expanded')
+        playgroundElement.classList.remove('drag-handler')
+        playgroundContent.style.display = "none"
+      }
+      else{
+        playgroundElement.classList.add('playground-expanded')
+        playgroundElement.classList.add('drag-handler')
+        dragHandler()
+        playgroundContent.style.display = "block"
+        /*fetch('/playground')
+          .then(response => response.text())
+          .then(data => {
+          // Append the overlay content to the body
+          playgroundElement.insertAdjacentHTML('beforeend', data);
+          })
+          .catch(error => console.error('Error fetching overlay content:', error));
+        }*/
+    }
+  }
+
+    function showModuleFunctions(id) {
+        let name, functions, icon;
+        name = document.getElementById('playground-module-title-wrapper-' + id);
+        functions = document.getElementById('playground-module-functions-' + id);
+        icon = document.getElementById('playground-module-icon-' + id);
+        name.setAttribute('onclick', 'hideModuleFunctions("'+id+'")');
+        functions.style.display = "block";
+        icon.style.transform = 'rotate(180deg)';
+    }
+
+    function hideModuleFunctions(id) {
+        let name, functions, icon;
+        name = document.getElementById('playground-module-title-wrapper-' + id);
+        functions = document.getElementById('playground-module-functions-' + id);
+        icon = document.getElementById('playground-module-icon-' + id);
+        name.setAttribute('onclick', 'showModuleFunctions("'+id+'")');
+        functions.style.display = "None";
+        icon.style.transform = 'rotate(0deg)';
+    }
+
+    function runPlaygroundFunctionWrite(functionName, deviceName) {
+      let moduleElement = document.querySelector("#playground-module-" + deviceName);
+      let functionElement = moduleElement.querySelector("#playground-function-" + functionName);
+
+      let writeVariableStr = "";
+
+      let i = 1;
+      let indexExists = true;
+      while(indexExists) {
+          try {
+              let variableNameElement = functionElement.querySelector(`#playground-variable-write-name-${i}`);
+              let variableValueElement = functionElement.querySelector(`#playground-variable-write-value-${i}`);
+
+              if (!variableNameElement || !variableValueElement) {
+                  throw new Error("Element not found");
+              }
+
+              let variableName = variableNameElement.textContent;
+              let variableValue = variableValueElement.value;
+
+              if (!variableValue) {
+                  variableValueElement.style.outline = "1px solid red";
+                  return;
+              } else {
+                  variableValueElement.style.outline = "none";
+              }
+
+              if (writeVariableStr !== "") {
+                  writeVariableStr += " ";
+              }
+              writeVariableStr += `${variableName} ${variableValue}`;
+          } catch {
+              indexExists = false;
+          }
+          i += 1;
+      }
+
+      console.log(writeVariableStr)
+
+      blSend(deviceName, writeVariableStr);
+
+    }
+
+    function runPlaygroundFunctionRead(functionName, deviceName) {
+      let moduleElement = document.querySelector("#playground-module-" + deviceName);
+      let functionElement = moduleElement.querySelector("#playground-function-" + functionName);
+
+      let readVariableStr = ""
+      let selectedScreen
+
+      i = 1
+      index_exists = true
+      try{
+          let screenSelect = functionElement.querySelector(`#playground-function-read-select-screen`);
+          selectedScreen = screenSelect.options[screenSelect.selectedIndex].value
+          if(selectedScreen == "-- select a screen --"){
+            screenSelect.style.outline = "1px solid red";
+            return;
+          }
+          else{
+            screenSelect.style.outline = "none";
+          }
+      }
+      catch{
+        index_exists = false
+      }
+
+      while(index_exists){
+        try{
+          let variable_name = functionElement.querySelector(`#playground-variable-read-name-${i}`).textContent
+          if(readVariableStr != ""){
+            readVariableStr += " "
+          }
+          readVariableStr += `${variable_name}`
+        }
+        catch{
+          index_exists = false
+        }
+        i += 1
+      }
+      blRead(deviceName, readVariableStr, selectedScreen);
+
+    }
+
+
+    $(document).ready(dragHandler);
 
 </script>
 
