@@ -29,57 +29,99 @@
           </div>
         </div>
         <div class="relative mt-6 flex-1 px-4 sm:px-6">
-          
-          <!-- Your content -->
-          
-          <div id="times" class="mt-2 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
-            <div class="sm:col-span-3">
-              <label for="start-time" class="block text-sm font-medium leading-6 text-gray-900">Start time</label>
-              <div class="mt-2">
-                <input type="text" name="start-time" id="start-time" placeholder="00:00" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
-              </div>
-            </div>
-    
-            <div class="sm:col-span-3">
-              <label for="end-time" class="block text-sm font-medium leading-6 text-gray-900">End time</label>
-              <div class="mt-2">
-                <input type="text" name="end-time" id="end-time" placeholder="00:00" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
-              </div>
-            </div>
-          </div>
-          
-          <div class="border-b border-t border-gray-900/10 pb-6 mt-4">
 
-            <h2 class="text-base font-semibold leading-7 text-gray-900 mt-2">Functions</h2>
+          <div class="border-b border-gray-900/10 pb-6">
+            <select id="action-type-select" onchange="changeActionType()" name="action-type-select" class="block w-full rounded-md py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 placeholder:text-sm focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+              <option value="single-action">Single Action</option>
+              <option value="multiple-actions">Multiple Actions</option>
+            </select>
+          </div>
+
+
+          <div id="single-action" class="mt-2">
+
+            <div id="times" class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
+              <div class="sm:col-span-3">
+                <label for="start-time-single" class="block text-sm font-medium leading-6 text-gray-900">Start time</label>
+                <div class="mt-2">
+                  <input type="text" name="start-time-single" id="start-time-single" placeholder="00:00" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
+                </div>
+              </div>
       
-            <div id="functions" class="mt-4 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
-              <div id="function-write" class="sm:col-span-6">
-                <label for="function-write-select" class="block text-m font-medium leading-6 text-gray-900">Write function</label>
+              <div class="sm:col-span-3">
+                <label for="duration" class="block text-sm font-medium leading-6 text-gray-900">Duration</label>
                 <div class="mt-2">
-                  <select id="function-write-select" onchange="addFunctionVariables('write')" name="function-write-select" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 placeholder:text-sm focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                    <option hidden disabled selected value> -- select an option -- </option>
-                    {% for function in module.functions if function.method == 'Write' %}
-                    <option>{{function.name}}</option>
-                    {% endfor %}
-                  </select>
+                  <input type="text" name="duration" id="duration" placeholder="00:00" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
+                </div>
+              </div>
+            </div>
+            
+            <div class="border-b border-t border-gray-900/10 pb-6 mt-4">
+
+              <h2 class="text-base font-semibold leading-7 text-gray-900 mt-2">Functions</h2>
+        
+              <div id="functions" class="mt-4 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
+                <div id="function-write-1" class="sm:col-span-6">
+                  <label for="function-write-select-1" class="block text-m font-medium leading-6 text-gray-900">Write function</label>
+                  <div class="mt-2">
+                    <select id="function-write-select-1" onchange="addFunctionVariables('write', '1')" name="function-write-select-1" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 placeholder:text-sm focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                      <option hidden disabled selected value> -- select an option -- </option>
+                      {% for function in module.functions if function.method == 'Write' %}
+                      <option>{{function.name}}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+
+                <div id="function-read" class="sm:col-span-6 mt-4">
+                  <label for="function-read-select-1" class="block text-m font-medium leading-6 text-gray-900">Read function</label>
+                  <div class="mt-2">
+                    <select id="function-read-select-1" onchange="addFunctionVariables('read')" name="function-read-select-1" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 placeholder:text-sm focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                      <option hidden disabled selected value> -- select an option -- </option>
+                      {% for function in module.functions if function.method == 'Read' %}
+                      <option>{{function.name}}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              <div id="function-read" class="sm:col-span-6 mt-4">
-                <label for="function-read-select" class="block text-m font-medium leading-6 text-gray-900">Read function</label>
-                <div class="mt-2">
-                  <select id="function-read-select" onchange="addFunctionVariables('read')" name="function-read-select" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 placeholder:text-sm focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                    <option hidden disabled selected value> -- select an option -- </option>
-                    {% for function in module.functions if function.method == 'Read' %}
-                    <option>{{function.name}}</option>
-                    {% endfor %}
-                  </select>
-                </div>
-              </div>
+            </div>
 
           </div>
 
 
+          <div id="multiple-actions" class="mt-2"  style="display: none;">
+
+            <div id="times" class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
+              <div class="sm:col-span-3">
+                <label for="start-time-multiple" class="block text-sm font-medium leading-6 text-gray-900">Start time</label>
+                <div class="mt-2">
+                  <input type="text" name="start-time-multiple" id="start-time-multiple" placeholder="00:00" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
+                </div>
+              </div>
+    
+            </div>
+
+            <div id="action-amount" class="border-t mt-4 sm:col-span-6">
+              <label for="action-amount-select" class="block mt-2 text-m font-medium leading-6 text-gray-900">Amount of actions</label>
+              <div class="mt-2">
+                <select id="action-amount-select" onchange="addMultipleFunctions('{{module.name}}')" name="action-amount-select" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 placeholder:text-sm focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                  <option hidden disabled selected value> -- select an option -- </option>
+                  {% for i in range(10) %}
+                  <option>{{i+1}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div id="action-repeats" class="mt-4 sm:col-span-3">
+              <label for="repeat-value" id="repeat-value-name" class="block text-m font-medium leading-6 text-gray-900">Number of repeats</label>
+              <div class="mt-2">
+                <input type="number" step="1" name="repeat-value" id="repeat-value" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
+              </div>
+            </div>
+          </div>
+    
         </div>
       </div>
       <div class="flex flex-shrink-0 justify-end px-4 py-4">

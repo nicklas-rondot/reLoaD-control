@@ -349,28 +349,53 @@
         .then(response => response.text())
         .then(data => {
         // Append the overlay content to the body
-        document.body.insertAdjacentHTML('beforeend', data);
+        document.body.insertAdjacentHTML('beforeend', data)
         })
-        .catch(error => console.error('Error fetching overlay content:', error));
+        .catch(error => console.error('Error fetching overlay content:', error))
     }
 
     function closeAddActionOverlay(){
       document.getElementById('action-overlay').remove()
     }
 
-    function addFunctionVariables(method){
-      let select = document.getElementById(`function-${method}-select`)
-      let functionName = select.options[select.selectedIndex].text
+    function changeActionType(){
+      let select = document.getElementById(`action-type-select`)
+      let actionType = select.options[select.selectedIndex].value
+      document.getElementById(`single-action`).style.display = "none"
+      document.getElementById(`multiple-actions`).style.display = "none"
+      document.getElementById(`${actionType}`).style.display = "block"
+    }
+
+    function addMultipleFunctions(module){
+      let select = document.getElementById(`action-amount-select`)
+      let actionAmount = select.options[select.selectedIndex].text
       try{
-        document.getElementById(`function-${method}`).variables.remove()
+        document.getElementById(`multiple-functions`).remove()
       }
       catch{}
-      console.log('add function variables')
-        fetch(`/add_function_variables?function=${functionName}`)
+      console.log('add multiple functions')
+        fetch(`/add_multiple_functions?amount=${actionAmount}&module=${module}`)
         .then(response => response.text())
         .then(data => {
         // Append the overlay content to the body
-        document.getElementById(`function-${method}`).insertAdjacentHTML('beforeend', data);
+        document.getElementById(`multiple-actions`).insertAdjacentHTML('beforeend', data);
+        })
+        .catch(error => console.error('Error fetching overlay content:', error));
+    }
+
+    function addFunctionVariables(method, i){
+      let select = document.getElementById(`function-${method}-select-${i}`)
+      let functionName = select.options[select.selectedIndex].text
+      try{
+        document.getElementById(`function-${method}-${i}`).variables.remove()
+      }
+      catch{}
+      console.log('add function variables')
+        fetch(`/add_function_variables?function=${functionName}&i=${i}`)
+        .then(response => response.text())
+        .then(data => {
+        // Append the overlay content to the body
+        document.getElementById(`function-${method}-${i}`).insertAdjacentHTML('beforeend', data);
         })
         .catch(error => console.error('Error fetching overlay content:', error));
     }
@@ -398,26 +423,76 @@
       return true;
     }
 
-
     function addAction(module){
-      const startTime = document.getElementById('start-time').value
-      const endTime = document.getElementById('end-time').value
-
-      if (!isValildTimeFormat(startTime)){
-        document.getElementById('start-time').style.outline = "1px solid red";
+      let select = document.getElementById(`action-type-select`)
+      let actionType = select.options[select.selectedIndex].value
+      if(actionType == "single-action"){
+        const startTime = document.getElementById('start-time-single').value
+        const duration = document.getElementById('duration').value
+        if (!isValildTimeFormat(startTime)){
+        document.getElementById('start-time-single').style.outline = "1px solid red";
         return;
-      }
-      else{
-        document.getElementById('start-time').style.outline = "none";
+        }
+        else{
+          document.getElementById('start-time-single').style.outline = "none";
+        }
+
+        if (!isValildTimeFormat(duration)){
+          document.getElementById('duration').style.outline = "1px solid red";
+          return;
+        }
+        else{
+          document.getElementById('duration').style.outline = "none";
+        }
+        addActionSingle(module, '1', startTime, duration)
       }
 
-      if (!isValildTimeFormat(endTime)){
-        document.getElementById('end-time').style.outline = "1px solid red";
-        return;
+      else if(actionType == "multiple-actions"){
+        const repeatValue = document.getElementById('repeat-value').value
+        const actionAmount = document.getElementById('action-amount-select').value
+        let lastEndTime = '00:00'
+        for(let j = 1; j <= repeatValue; j++){
+          for(let i = 2; i-1 <= actionAmount; i++){
+            if(lastEndTime == '00:00'){
+              lastEndTime = document.getElementById('start-time-multiple').value
+            }
+            const duration = document.getElementById(`duration-${i}`).value
+            console.log(duration)
+            if (!isValildTimeFormat(lastEndTime)){
+            document.getElementById('start-time-multiple').style.outline = "1px solid red";
+            return;
+            }
+            else{
+              document.getElementById('start-time-multiple').style.outline = "none";
+            }
+
+            if (!isValildTimeFormat(duration)){
+              document.getElementById(`duration-${i}`).style.outline = "1px solid red";
+              return;
+            }
+            else{
+              document.getElementById(`duration-${i}`).style.outline = "none";
+            }
+
+            lastEndTime = addActionSingle(module, i, lastEndTime, duration)
+          }
+        }
       }
-      else{
-        document.getElementById('end-time').style.outline = "none";
-      }
+
+      closeAddActionOverlay()
+      showScreens()
+      timelineDataToLocalstorage()
+    }
+
+    function addActionSingle(module, i, startTime, duration){
+      const [durationMinutes, durationSeconds] = duration.split(':').map(Number);
+      const totalDurationSeconds = durationMinutes * 60 + durationSeconds;
+      const [startMinutes, startSeconds] = startTime.split(':').map(Number);
+      const totalStartSeconds = startMinutes * 60 + startSeconds;
+      const endTotalSeconds = totalStartSeconds + totalDurationSeconds;
+      const endMinutes = Math.floor(endTotalSeconds / 60);
+      const endSeconds = endTotalSeconds % 60;
+      const endTime = `${String(endMinutes).padStart(2, '0')}:${String(endSeconds).padStart(2, '0')}`;
 
       const id = Date.now().toString(36) + Math.floor(Math.pow(10, 12) + Math.random() * 9*Math.pow(10, 12)).toString(36)
 
@@ -430,10 +505,10 @@
         'methods': {}
       }
 
-      let writeSelect = document.getElementById(`function-write-select`)
+      let writeSelect = document.getElementById(`function-write-select-${i}`)
       let writeFunctionName = writeSelect.options[writeSelect.selectedIndex].text
 
-      let readSelect = document.getElementById(`function-read-select`)
+      let readSelect = document.getElementById(`function-read-select-1`)
       let readFunctionName = readSelect.options[readSelect.selectedIndex].text
       console.log(readFunctionName)
 
@@ -450,18 +525,18 @@
 
       let writeVariableStr = ""
 
-      let i = 1
+      let j = 1
       let index_exists = true
       while(index_exists){
         try{
-          let variable_name = document.getElementById(`variable-write-name-${i}`).textContent
-          let variable_value = document.getElementById(`variable-write-value-${i}`).value
+          let variable_name = document.getElementById(`variable-write-name-${i}-${j}`).textContent
+          let variable_value = document.getElementById(`variable-write-value-${i}-${j}`).value
           if(!variable_value){
-            document.getElementById(`variable-write-value-${i}`).style.outline = "1px solid red";
+            document.getElementById(`variable-write-value-${i}-${j}`).style.outline = "1px solid red";
             return;
           }
           else{
-            document.getElementById(`variable-write-value-${i}`).style.outline = "none";
+            document.getElementById(`variable-write-value-${i}-${j}`).style.outline = "none";
           }
           if(writeVariableStr != ""){
             writeVariableStr += " "
@@ -471,7 +546,7 @@
         catch{
           index_exists = false
         }
-        i += 1
+        j += 1
       }
 
       if(writeVariableStr != ""){
@@ -487,7 +562,7 @@
       let readVariableStr = ""
       let selectedScreen
 
-      i = 1
+      j = 1
       index_exists = true
       try{
           let screenSelect = document.getElementById(`function-read-select-screen`)
@@ -506,7 +581,7 @@
 
       while(index_exists){
         try{
-          let variable_name = document.getElementById(`variable-read-name-${i}`).textContent
+          let variable_name = document.getElementById(`variable-read-name-${i}-${j}`).textContent
           if(readVariableStr != ""){
             readVariableStr += " "
           }
@@ -515,7 +590,7 @@
         catch{
           index_exists = false
         }
-        i += 1
+        j += 1
       }
 
 
@@ -534,9 +609,9 @@
       moduleObj['actions'].push(actionJson)
       console.log(timelineJson)
       addActionElement(module, actionJson)
-      closeAddActionOverlay()
-      showScreens()
-      timelineDataToLocalstorage()
+
+      return endTime
+
     }
 
     function deleteAction(module, actionId){

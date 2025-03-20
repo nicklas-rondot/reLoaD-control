@@ -1,17 +1,17 @@
-{% if function.method.lower() == 'write' %}
+{% if context.function.method.lower() == 'write' %}
 <div id="function-write-variables" class="mt-2 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
-    {% for variable in function.variables %}
+    {% for variable in context.function.variables %}
     <div class="sm:col-span-3">
-      <label for="variable-write-value-{{loop.index}}" id="variable-write-name-{{loop.index}}" class="block text-sm font-medium leading-6 text-gray-900">{{variable.name}}</label>
+      <label for="variable-write-value-{{context.i}}-{{loop.index}}" id="variable-write-name-{{context.i}}-{{loop.index}}" class="block text-sm font-medium leading-6 text-gray-900">{{variable.name}}</label>
       <div class="mt-2">
-        <input type="text" name="variable-write-value-{{loop.index}}" id="variable-write-value-{{loop.index}}" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
+        <input type="text" name="variable-write-value-{{context.i}}-{{loop.index}}" id="variable-write-value-{{context.i}}-{{loop.index}}" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 variables">
       </div>
     </div>
     {% endfor %}
-  </div>
+</div>
 {% endif %}
 
-{% if function.method.lower() == 'read' %}
+{% if context.function.method.lower() == 'read' %}
 <div id="function-read-variables" class="mt-2 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
     <div id="function-read-select-screen-wrapper" class="sm:col-span-6">
         <label for="function-read-select-screen" class="block text-m font-medium leading-6 text-gray-900">Select screen</label>
@@ -24,9 +24,9 @@
             </select>
         </div>
     </div>
-    {% for variable in function.variables %}
+    {% for variable in context.function.variables %}
     <div class="sm:col-span-3">
-      <p for="variable-read-value-{{loop.index}}" id="variable-read-name-{{loop.index}}" class="block text-sm font-medium leading-6 text-gray-900">{{variable.name}}</p>
+      <p for="variable-read-value-{{context.i}}-{{loop.index}}" id="variable-read-name-{{context.i}}-{{loop.index}}" class="block text-sm font-medium leading-6 text-gray-900">{{variable.name}}</p>
     </div>
     {% endfor %}
   </div>
