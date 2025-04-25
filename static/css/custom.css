@@ -10,6 +10,13 @@
     visibility: visible;
 }
 
+.select-inline{
+    display: inline-block;
+    position: relative;
+    width: auto;
+    padding: 5px 8px;
+}
+
 .top-row{
     margin-bottom: 20px;
 }
@@ -316,6 +323,41 @@ h1{
     z-index: 1000;
 }
 
+
+table {
+    width: 100%;
+}
+
+thead, tbody, tr, td, th { display: block; }
+
+tr:after {
+    content: ' ';
+    display: block;
+    visibility: hidden;
+    clear: both;
+}
+
+thead th {
+    height: 30px;
+
+    /*text-align: left;*/
+}
+
+tbody {
+    height: calc(100% - 70px);
+    overflow-y: auto;
+}
+
+thead {
+    /* fallback */
+}
+
+
+tbody td, thead th {
+    width: 19.2%;
+    float: left;
+}
+
 /*remove later on*/
 
 .bg-indigo-600{
@@ -324,4 +366,8 @@ h1{
 
 .bg-indigo-600:hover{
         background-color: #2cc5a9;
+}
+
+.ring-indigo-600:focus{
+    border: 0 0 0 3px #2cc5a9;
 }

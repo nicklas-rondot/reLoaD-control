@@ -39,13 +39,24 @@
 
   <div class="screen-row">
     <div class="screen box" id="screen1">
+      <div class="screen-top">
+        <p class="screen-title"></p>
+        <select id="screen-select-1" name="screen-select-type" onchange="selectScreenType(1)" class="select-inline block w-full rounded border-0 py-1.5 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 placeholder:text-sm focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+          <option value="chart">Chart</option>
+          <option value="table">Table</option>
+        </select>
+        <button type="button" onclick="downloadScreen(1)" class="mt-2 rounded bg-white px-2 py-1 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Download Data</button>
+      </div>
       <div id="chart1"></div>
+      <div id="table1" style="display: none;"></div>
     </div>
     <div class="screen box" id="screen2">
       <div id="chart2"></div>
+      <div id="table2"></div>
     </div>
     <div class="screen box" id="screen3">
       <div id="chart3"></div>
+      <div id="table3"></div>
     </div>
 
   </div>
@@ -763,6 +774,7 @@
       }
       chart = createChart(screen, format)
       screen.chartInstance = chart;
+      table = createTable(screen, format)
       console.log(screens)
       
     }
@@ -1221,6 +1233,24 @@
       screen["disabled"] = true
     }
 
+    function createTable(screen, format){
+      const table = document.getElementById(`table${screen.id}`);
+      const thead = document.createElement('thead');
+      const tbody = document.createElement('tbody');
+      const headerRow = document.createElement('tr');
+      const timeHeader = document.createElement('th');
+      timeHeader.textContent = "Time";
+      headerRow.appendChild(timeHeader);
+      for(let i=0; i<format.split(/\s+/).length; i++){
+        const header = document.createElement('th');
+        header.textContent = format.split(/\s+/)[i];
+        headerRow.appendChild(header);
+      }
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+      table.appendChild(tbody);
+    }
+
     function writeToScreen(deviceName, data_str, screen){
       if(screen["disabled"]){
         console.log("screen disabled")
@@ -1228,6 +1258,11 @@
       }
       const format = screen.format
       const currentTime = new Date().getTime();
+
+      const tableRow = document.createElement('tr');
+      const timeCell = document.createElement('td');
+      timeCell.textContent = new Date(currentTime).toLocaleTimeString() + '.' + new Date(currentTime).getMilliseconds(); 
+      tableRow.appendChild(timeCell);
 
       let newSeries = []
       const variables = format.split(/\s+/)
@@ -1239,6 +1274,11 @@
           screen.data[data[i]].shift()
         }
         screen.data[data[i]].push({ x: currentTime, y: data[i+1] })
+
+        const cell = document.createElement('td');
+        cell.textContent = data[i+1];
+        tableRow.appendChild(cell);
+
         newSeries.push(
           {
             name: data[i],
@@ -1246,10 +1286,54 @@
           }
         )
       }
+      const table = document.getElementById(`table${screen.id}`);
+      const tbody = table.querySelector('tbody'); 
+      tbody.appendChild(tableRow);
+      tbody.scrollTop = tbody.scrollHeight;
+
       console.log(screen.data)
       console.log(newSeries)
 
       screen.chartInstance.updateSeries(newSeries);
+    }
+
+    function selectScreenType(number){
+      let select = document.getElementById(`screen-select-${number}`)
+      let screenType = select.options[select.selectedIndex].value
+      console.log(screenType)
+      if(screenType == "chart"){
+        document.getElementById(`chart${number}`).style.display = "block"
+        document.getElementById(`table${number}`).style.display = "none"
+      }
+      else if(screenType == "table"){
+        document.getElementById(`chart${number}`).style.display = "none"
+        document.getElementById(`table${number}`).style.display = "block"
+      }
+    }
+
+    function downloadScreen(number){
+      //Download the data from the table as a CSV file
+      let table = document.getElementById(`table${number}`);
+      let rows = table.querySelectorAll('tr');
+      let csv = [];
+      for (let i = 0; i < rows.length; i++) {
+        let row = rows[i].querySelectorAll('td, th');
+        let rowData = [];
+        for (let j = 0; j < row.length; j++) {
+          rowData.push(row[j].innerText);
+        }
+        csv.push(rowData.join(','));
+      }
+      let csvString = csv.join('\n');
+      let blob = new Blob([csvString], { type: 'text/csv' });
+      let url = URL.createObjectURL(blob);
+      let a = document.createElement('a');
+      a.href = url;
+      a.download = `screen${number}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
 
     function editName(id){
